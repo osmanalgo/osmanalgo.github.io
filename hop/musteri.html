@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title>hop! · Sipariş Takibi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10; --card:#12151b; --line:#1f242d; --tx:#f2f4f7; --mut:#8a93a3;
+  --amb:#ffb020; --amb2:#ff7a1a; --grn:#1ee38a; --grn2:#0bbf6e; --red:#ff5468;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:env(safe-area-inset-top) 20px env(safe-area-inset-bottom)}
+.bgfx{position:fixed;inset:-30%;z-index:-1;pointer-events:none;
+  background:radial-gradient(40% 35% at 30% 30%,rgba(255,176,32,.16),transparent 70%),
+             radial-gradient(35% 30% at 75% 70%,rgba(255,122,26,.12),transparent 70%);
+  filter:blur(20px);animation:drift 14s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(6%,-5%) rotate(8deg)}}
+.scr{display:none;width:100%;max-width:420px;text-align:center;flex-direction:column;align-items:center;gap:22px}
+.scr.on{display:flex;animation:in .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes in{from{opacity:0;transform:translateY(14px)}}
+.brand{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-size:15px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.live{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--mut);
+  background:var(--card);border:1px solid var(--line);padding:7px 13px;border-radius:99px}
+.live i{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 0 0 rgba(30,227,138,.6);animation:ping 2s infinite}
+.live.off i{background:var(--red);animation:none}
+@keyframes ping{70%{box-shadow:0 0 0 8px rgba(30,227,138,0)}100%{box-shadow:0 0 0 0 rgba(30,227,138,0)}}
+
+/* Başlangıç */
+.big{font-family:'Space Grotesk',system-ui,sans-serif;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+#sNo{font-size:96px}
+.lbl{font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--mut)}
+.btn{width:100%;border:0;border-radius:18px;padding:19px;font:600 17px Inter;color:#111;cursor:pointer;
+  background:linear-gradient(135deg,var(--amb),var(--amb2));box-shadow:0 10px 30px -10px rgba(255,140,26,.6);transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.hint{font-size:13.5px;color:var(--mut);line-height:1.55;max-width:300px}
+
+/* Bekleme halkası */
+.ringw{position:relative;width:min(78vw,300px);aspect-ratio:1}
+.ringw svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ringw .trk{stroke:var(--line)}
+.ringw .bar{stroke:url(#g);stroke-linecap:round;transition:stroke-dashoffset 1s ease}
+.glow{position:absolute;inset:12%;border-radius:50%;background:radial-gradient(circle,rgba(255,176,32,.22),transparent 70%);animation:breathe 3.2s ease-in-out infinite}
+@keyframes breathe{50%{transform:scale(1.12);opacity:.55}}
+.ringc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px}
+#wNo{font-size:clamp(72px,24vw,112px)}
+.st{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--amb);font-size:16px}
+.dots span{display:inline-block;width:5px;height:5px;margin:0 1.5px;border-radius:50%;background:currentColor;animation:b 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.15s}.dots span:nth-child(3){animation-delay:.3s}
+@keyframes b{40%{transform:translateY(-5px);opacity:.4}}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 10px}
+.stat b{display:block;font:700 24px 'Space Grotesk',system-ui,sans-serif;font-variant-numeric:tabular-nums}
+.stat small{font-size:12px;color:var(--mut)}
+
+/* Hazır */
+body.ready{background:var(--grn2)}
+body.ready .bgfx{background:radial-gradient(50% 40% at 50% 40%,rgba(255,255,255,.35),transparent 70%);animation:flash 1s ease-in-out infinite alternate}
+@keyframes flash{from{opacity:.25}to{opacity:1}}
+#ready{color:#04170d}
+.chk{width:150px;height:150px;border-radius:50%;background:#fff;display:grid;place-items:center;
+  box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:pulse 1.4s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 34px rgba(255,255,255,0)}100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+.chk svg{width:74px;stroke:var(--grn2);stroke-width:5;fill:none;stroke-linecap:round;stroke-linejoin:round;
+  stroke-dasharray:60;stroke-dashoffset:60;animation:draw .6s .2s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+#ready h1{font:700 30px/1.1 'Space Grotesk',system-ui,sans-serif}
+.hopxl{animation:land .7s cubic-bezier(.2,1.6,.4,1)}
+.hopxl .hop{font-size:clamp(96px,30vw,132px);color:#04170d}
+.hopxl .hop .x{color:#fff}
+@keyframes land{from{transform:translateY(-60px) scale(.6);opacity:0}}
+body.ready .pw,body.ready .pw .hop{color:#063d22}
+body.ready .pw .hop .x{color:#fff}
+#rNo{font-size:64px}
+#ready .lbl,#ready .hint{color:#063d22}
+.btn.w{background:#04170d;color:#fff;box-shadow:none}
+
+
+/* hop! logosu — "o" zıplayan top */
+.hop{font:700 22px/1 'Space Grotesk',system-ui,sans-serif;display:inline-flex;align-items:baseline;letter-spacing:-.03em;color:var(--tx)}
+.hop .o{display:inline-block;width:.5em;height:.5em;border:.13em solid currentColor;border-radius:50%;margin:0 .03em;transform-origin:50% 100%;animation:hopb 1.5s cubic-bezier(.35,0,.25,1) infinite}
+.hop .x{color:var(--amb);display:inline-block;transform-origin:50% 100%;animation:hopx 1.5s ease-in-out infinite}
+@keyframes hopb{0%,100%{transform:translateY(0) scale(1.18,.78)}12%{transform:translateY(0) scale(1)}45%{transform:translateY(-.42em) scale(.95,1.05)}78%{transform:translateY(0) scale(1)}}
+@keyframes hopx{0%,40%,100%{transform:rotate(0)}55%{transform:rotate(12deg)}70%{transform:rotate(-6deg)}}
+.pw{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));text-align:center;font-size:12px;color:var(--mut);text-decoration:none;display:flex;justify-content:center;align-items:baseline;gap:6px}
+.pw .hop{font-size:14px;color:var(--mut)}
+
+/* Teslim / hata */
+.ic{font-size:56px}
+h2{font:700 28px 'Space Grotesk',system-ui,sans-serif}
+</style>
+</head>
+<body>
+<div class="bgfx"></div>
+
+<!-- 1. Başlat (ses ve ekran izni için tek dokunuş) -->
+<section class="scr on" id="start">
+  <div class="brand" id="sAd">…</div>
+  <div class="lbl">Sipariş numaranız</div>
+  <div class="big" id="sNo">–</div>
+  <button class="btn" id="go">Takibi başlat</button>
+  <p class="hint">Siparişiniz hazır olunca telefonunuz çalacak. Bu sayfayı açık bırakın, ekran kendiliğinden kapanmaz.</p>
+</section>
+
+<!-- 2. Bekleme -->
+<section class="scr" id="wait">
+  <div class="brand" id="wAd">…</div>
+  <div class="ringw">
+    <div class="glow"></div>
+    <svg viewBox="0 0 120 120">
+      <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb020"/><stop offset="1" stop-color="#ff7a1a"/></linearGradient></defs>
+      <circle class="trk" cx="60" cy="60" r="52" fill="none" stroke-width="7"/>
+      <circle class="bar" id="bar" cx="60" cy="60" r="52" fill="none" stroke-width="7" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+    </svg>
+    <div class="ringc">
+      <div class="lbl">Sipariş</div>
+      <div class="big" id="wNo">–</div>
+      <div class="st">Hazırlanıyor <span class="dots"><span></span><span></span><span></span></span></div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat"><b id="sira">–</b><small>sıradaki konumunuz</small></div>
+    <div class="stat"><b id="kalan">–</b><small>tahmini süre</small></div>
+  </div>
+  <div class="live" id="live"><i></i><span id="liveT">Canlı takip açık</span></div>
+</section>
+
+<!-- 3. Hazır -->
+<section class="scr" id="ready">
+  <div class="hopxl"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
+  <h1>Siparişiniz hazır</h1>
+  <div><div class="lbl">Numara</div><div class="big" id="rNo">–</div></div>
+  <p class="hint">Lütfen tezgâha gelin.</p>
+  <button class="btn w" id="aldim">Aldım, sesi kapat</button>
+</section>
+
+<!-- 4. Teslim edildi -->
+<section class="scr" id="done">
+  <div class="ic">☕</div>
+  <h2>Afiyet olsun</h2>
+  <p class="hint" id="dAd">Bizi tercih ettiğiniz için teşekkürler.</p>
+</section>
+
+<!-- 5. Hata -->
+<section class="scr" id="err">
+  <div class="ic">⚠️</div>
+  <h2 id="eT">Sipariş bulunamadı</h2>
+  <p class="hint" id="eM">QR kodu tekrar okutun ya da kasaya danışın.</p>
+</section>
+
+<a class="pw" href="https://osmanalgo.github.io/hop/kurulum/" target="_blank" rel="noopener"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span><span>ile ücretsiz · osman.algo</span></a>
+
+<script>
+const q = new URLSearchParams(location.search);
+const S = q.get('s'), NO = Number(q.get('n')), DEMO = q.has('demo');
+const API = S ? 'https://script.google.com/macros/s/' + S + '/exec' : '';
+const $ = id => document.getElementById(id);
+let state = 'start', audio, wake, ringT, pollT, tries = 0;
+
+function show(id){ document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); state = id; }
+function err(t, m){ $('eT').textContent = t; $('eM').textContent = m; show('err'); }
+
+/* --- Sunucu --- */
+let demoT0 = Date.now();
+async function fetchDurum(){
+  if (DEMO){
+    const t = (Date.now() - demoT0) / 1000;
+    const sira = Math.max(1, 3 - Math.floor(t / 5));
+    return { ok:true, ad:'Kafem', no:NO || 27, d: t > 15 ? 'hazir' : 'hazirlaniyor', sira, dk:8, c: demoT0 - 4*60000 };
+  }
+  const r = await fetch(API + '?a=durum&no=' + NO + '&_=' + Date.now());
+  return r.json();
+}
+
+/* --- Ses (melodi değil: kısa çağrı tonu) --- */
+function unlockAudio(){
+  try{
+    audio = new (window.AudioContext || window.webkitAudioContext)();
+    const b = audio.createBuffer(1, 1, 22050), s = audio.createBufferSource();
+    s.buffer = b; s.connect(audio.destination); s.start(0);
+  }catch(_){}
+}
+function ding(){
+  if (!audio) return;
+  const t = audio.currentTime;
+  [[880,0],[1320,.18],[880,.5],[1320,.68]].forEach(([f,d]) => {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t+d); g.gain.linearRampToValueAtTime(.5, t+d+.02); g.gain.exponentialRampToValueAtTime(.001, t+d+.35);
+    o.connect(g); g.connect(audio.destination); o.start(t+d); o.stop(t+d+.4);
+  });
+  if (navigator.vibrate) navigator.vibrate([400,150,400,150,800]);
+}
+function startRing(){
+  stopRing(); let n = 0; ding();
+  ringT = setInterval(() => { if (++n > 24) return stopRing(); ding(); }, 2500);
+  let f = 0; document.__t = setInterval(() => { document.title = (f = !f) ? '🔔 hop! HAZIR' : 'Sipariş #' + NO; }, 900);
+}
+function stopRing(){ clearInterval(ringT); clearInterval(document.__t); document.title = 'hop! · Sipariş Takibi'; if (navigator.vibrate) navigator.vibrate(0); }
+
+/* --- Ekran açık kalsın --- */
+async function keepAwake(){ try{ if ('wakeLock' in navigator) wake = await navigator.wakeLock.request('screen'); }catch(_){} }
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible'){ keepAwake(); poll(); }
+});
+
+/* --- Arayüz --- */
+function render(o){
+  const ad = o.ad || '';
+  ['sAd','wAd'].forEach(i => $(i).textContent = ad);
+  if (o.d === 'hazirlaniyor'){
+    document.body.classList.remove('ready');
+    if (state !== 'start') show('wait');
+    $('wNo').textContent = o.no;
+    $('sira').textContent = o.sira;
+    const gecen = Date.now() - o.c, top = o.dk * 60000;
+    const kalan = Math.max(1, Math.ceil((top - gecen) / 60000));
+    $('kalan').textContent = gecen > top ? 'az kaldı' : '~' + kalan + ' dk';
+    const p = Math.min(.95, Math.max(.04, gecen / top));
+    $('bar').style.strokeDashoffset = 326.7 * (1 - p);
+  } else if (o.d === 'hazir'){
+    if (state !== 'ready' && state !== 'start'){
+      show('ready'); document.body.classList.add('ready'); startRing();
+    }
+    $('rNo').textContent = o.no;
+  } else if (o.d === 'teslim'){
+    stopRing(); document.body.classList.remove('ready');
+    $('dAd').textContent = (ad ? ad + ' · ' : '') + 'Bizi tercih ettiğiniz için teşekkürler.';
+    show('done');
+  }
+}
+
+async function poll(){
+  clearTimeout(pollT);
+  try{
+    const o = await fetchDurum();
+    tries = 0; $('live').classList.remove('off'); $('liveT').textContent = 'Canlı takip açık';
+    if (!o.ok){ return err('Sipariş bulunamadı', 'Numara bugün için kayıtlı değil. QR kodu tekrar okutun ya da kasaya danışın.'); }
+    render(o);
+    if (o.d === 'teslim') return;
+  }catch(_){
+    tries++; $('live').classList.add('off'); $('liveT').textContent = 'Bağlantı bekleniyor…';
+  }
+  const ms = state === 'ready' ? 8000 : Math.min(15000, 4000 + tries * 2000);
+  pollT = setTimeout(poll, ms);
+}
+
+/* --- Başlangıç --- */
+if (!DEMO && (!S || !NO)){
+  err('Geçersiz bağlantı', 'Bu sayfa kasadaki QR kod ile açılmalı.');
+} else {
+  $('sNo').textContent = NO || 27;
+  poll();
+}
+$('go').onclick = () => { unlockAudio(); keepAwake(); show('wait'); if (DEMO) demoT0 = Date.now(); poll(); };
+$('aldim').onclick = () => { stopRing(); $('aldim').textContent = 'Ses kapatıldı'; };
+</script>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title>hop! · Sipariş Ekranı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10; --card:#12151b; --line:#1f242d; --tx:#f2f4f7; --mut:#8a93a3;
+  --amb:#ffb020; --amb2:#ff7a1a; --grn:#1ee38a; --grn2:#0bbf6e; --red:#ff5468;
+  --hd:'Space Grotesk',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;overflow:hidden;cursor:none;
+  display:flex;flex-direction:column;height:100vh;height:100dvh}
+.bgfx{position:fixed;inset:-20%;z-index:-1;pointer-events:none;
+  background:radial-gradient(35% 40% at 75% 50%,rgba(30,227,138,.10),transparent 70%),
+             radial-gradient(30% 35% at 20% 60%,rgba(255,176,32,.08),transparent 70%);
+  filter:blur(30px);animation:drift 18s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translate(-4%,3%)}}
+
+/* logo */
+.hop{font:700 1em/1 var(--hd);display:inline-flex;align-items:baseline;letter-spacing:-.03em}
+.hop .o{display:inline-block;width:.5em;height:.5em;border:.13em solid currentColor;border-radius:50%;margin:0 .03em;transform-origin:50% 100%;animation:hopb 1.5s cubic-bezier(.35,0,.25,1) infinite}
+.hop .x{color:var(--amb);display:inline-block;transform-origin:50% 100%;animation:hopx 1.5s ease-in-out infinite}
+@keyframes hopb{0%,100%{transform:translateY(0) scale(1.18,.78)}12%{transform:translateY(0) scale(1)}45%{transform:translateY(-.42em) scale(.95,1.05)}78%{transform:translateY(0) scale(1)}}
+@keyframes hopx{0%,40%,100%{transform:rotate(0)}55%{transform:rotate(12deg)}70%{transform:rotate(-6deg)}}
+
+header{display:flex;align-items:center;gap:2.2vw;padding:2.4vh 3vw;border-bottom:1px solid var(--line)}
+header .hop{font-size:4.2vh}
+header .ad{flex:1;font:700 3.4vh var(--hd);padding-left:2.2vw;border-left:1px solid var(--line)}
+.clock{font:700 4vh var(--hd);font-variant-numeric:tabular-nums;color:var(--mut)}
+.lv{width:1.2vh;height:1.2vh;border-radius:50%;background:var(--grn);box-shadow:0 0 12px var(--grn)}
+.lv.off{background:var(--red);box-shadow:none}
+
+main{flex:1;display:grid;grid-template-columns:1fr 1.35fr;min-height:0}
+.col{padding:3.5vh 3vw;display:flex;flex-direction:column;min-height:0}
+.col+.col{border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(30,227,138,.05),transparent 50%)}
+.col h3{font:700 2.6vh var(--hd);letter-spacing:.16em;text-transform:uppercase;margin-bottom:3vh;display:flex;align-items:center;gap:1.2vw}
+.c1 h3{color:var(--amb)} .c2 h3{color:var(--grn)}
+.dot{width:1.2vh;height:1.2vh;border-radius:50%;background:currentColor;animation:bl 1.4s infinite}
+@keyframes bl{50%{opacity:.25}}
+.grid{display:flex;flex-wrap:wrap;gap:1.6vh;align-content:flex-start;overflow:hidden}
+.n{font-family:var(--hd);font-weight:700;font-variant-numeric:tabular-nums;border-radius:2vh;display:grid;place-items:center;
+  animation:pop .5s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}}
+.c1 .n{font-size:6vh;width:14vh;height:11vh;background:var(--card);border:1px solid var(--line);color:var(--tx)}
+.c2 .n{font-size:11vh;width:24vh;height:18vh;background:linear-gradient(160deg,rgba(30,227,138,.18),rgba(30,227,138,.06));
+  border:2px solid rgba(30,227,138,.45);color:var(--grn);box-shadow:0 2vh 5vh -3vh rgba(30,227,138,.6)}
+.c2 .n.new{animation:pop .5s cubic-bezier(.2,1.5,.4,1),glow 1.2s ease-in-out 3}
+@keyframes glow{50%{background:var(--grn);color:#04170d}}
+.empty{color:var(--mut);font-size:2.4vh;border:2px dashed var(--line);border-radius:2vh;padding:4vh 2vw;width:100%;text-align:center}
+
+footer{display:flex;align-items:center;justify-content:center;gap:1.2vw;padding:2vh 3vw;border-top:1px solid var(--line);color:var(--mut);font-size:2.2vh}
+footer .hop{font-size:2.8vh;color:var(--mut)}
+footer b{color:var(--tx);font-weight:600}
+
+/* Çağrı anı (tam ekran) */
+#call{position:fixed;inset:0;background:var(--grn2);display:none;flex-direction:column;align-items:center;justify-content:center;gap:2vh;color:#04170d;z-index:5}
+#call.on{display:flex;animation:fl .35s}
+@keyframes fl{from{opacity:0;transform:scale(1.05)}}
+#call .hop{font-size:16vh;animation:land .7s cubic-bezier(.2,1.6,.4,1)}
+#call .hop .x{color:#fff}
+@keyframes land{from{transform:translateY(-12vh) scale(.6);opacity:0}}
+#call .no{font:700 34vh/1 var(--hd);font-variant-numeric:tabular-nums;animation:land .8s .1s cubic-bezier(.2,1.6,.4,1) both}
+#call p{font:600 4vh var(--hd)}
+
+/* Başlat */
+#start{position:fixed;inset:0;background:rgba(5,6,9,.86);backdrop-filter:blur(8px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3vh;z-index:9;cursor:pointer;text-align:center;padding:4vw}
+#start .hop{font-size:12vh}
+#start button{font:600 3vh Inter;color:#111;border:0;border-radius:2vh;padding:2.4vh 5vw;background:linear-gradient(135deg,var(--amb),var(--amb2));cursor:pointer}
+#start p{color:var(--mut);font-size:2.2vh;max-width:60vw;line-height:1.5}
+#start.off{display:none}
+
+@media (orientation:portrait){
+  main{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .col+.col{border-left:0;border-top:1px solid var(--line)}
+  .c1 .n{font-size:4vh;width:10vh;height:8vh}
+  .c2 .n{font-size:7vh;width:16vh;height:12vh}
+}
+</style>
+</head>
+<body>
+<div class="bgfx"></div>
+
+<header>
+  <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+  <div class="ad" id="ad">…</div>
+  <i class="lv" id="lv"></i>
+  <div class="clock" id="clock">--:--</div>
+</header>
+
+<main>
+  <section class="col c1"><h3><span class="dot"></span>Hazırlanıyor</h3><div class="grid" id="g1"></div></section>
+  <section class="col c2"><h3><span class="dot"></span>Hazır · gelin alın</h3><div class="grid" id="g2"></div></section>
+</main>
+
+<footer>
+  <span>Numaranız hazır olunca burada ve <b>telefonunuzda</b> görünür</span>
+  <span>·</span>
+  <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+  <span>osman.algo</span>
+</footer>
+
+<div id="call">
+  <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+  <div class="no" id="cNo">–</div>
+  <p>Siparişiniz hazır, tezgâha gelin</p>
+</div>
+
+<div id="start">
+  <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+  <button id="go">Ekranı başlat</button>
+  <p>Sesli anons için bir kez dokunun. Ekran açık kalır, tam ekrana geçer.</p>
+</div>
+
+<script>
+const q = new URLSearchParams(location.search), S = q.get('s'), DEMO = q.has('demo');
+const API = S ? 'https://script.google.com/macros/s/' + S + '/exec' : '';
+const $ = id => document.getElementById(id);
+let known = null, audio, queue = [], calling = false, pollT, tries = 0;
+
+/* Demo: sırayla hazır olan siparişler */
+const D = { hz: [31,32,33,34,35,36], hr: [28,29,30], t: Date.now() };
+function demo(){
+  if (Date.now() - D.t > 7000 && D.hz.length){
+    D.t = Date.now(); D.hr.push(D.hz.shift()); if (D.hr.length > 6) D.hr.shift();
+    D.hz.push(Math.max(...D.hz, ...D.hr) + 1);
+  }
+  return { ok: true, ad: 'Kafem', hz: [...D.hz], hr: [...D.hr] };
+}
+async function fetchPano(){
+  if (DEMO) return demo();
+  const r = await fetch(API + '?a=pano&_=' + Date.now());
+  return r.json();
+}
+
+/* Ses: kısa anons tonu (melodi değil) */
+function ding(){
+  if (!audio) return;
+  const t = audio.currentTime;
+  [[660,0],[990,.2],[1320,.4]].forEach(([f,d]) => {
+    const o = audio.createOscillator(), g = audio.createGain();
+    o.type = 'sine'; o.frequency.value = f;
+    g.gain.setValueAtTime(0, t+d); g.gain.linearRampToValueAtTime(.45, t+d+.02); g.gain.exponentialRampToValueAtTime(.001, t+d+.5);
+    o.connect(g); g.connect(audio.destination); o.start(t+d); o.stop(t+d+.55);
+  });
+}
+
+/* Yeni hazır numaraları tek tek tam ekranda göster */
+function nextCall(){
+  if (calling || !queue.length) return;
+  calling = true;
+  $('cNo').textContent = queue.shift();
+  const c = $('call'); c.classList.remove('on'); void c.offsetWidth; c.classList.add('on');
+  ding();
+  setTimeout(() => { c.classList.remove('on'); calling = false; setTimeout(nextCall, 400); }, 5000);
+}
+
+function render(o){
+  $('ad').textContent = o.ad || '';
+  const fresh = known ? o.hr.filter(n => !known.has(n)) : [];
+  $('g1').innerHTML = o.hz.length ? o.hz.map(n => '<div class="n">' + n + '</div>').join('') : '<div class="empty">Şu an hazırlanan sipariş yok</div>';
+  const hr = [...o.hr].reverse(); // en son hazır olan başta
+  $('g2').innerHTML = hr.length ? hr.map(n => '<div class="n' + (fresh.includes(n) ? ' new' : '') + '">' + n + '</div>').join('') : '<div class="empty">Hazır sipariş bekleniyor</div>';
+  known = new Set(o.hr);
+  if (fresh.length){ queue.push(...fresh); nextCall(); }
+}
+
+async function poll(){
+  clearTimeout(pollT);
+  try {
+    const o = await fetchPano();
+    if (o.ok){ render(o); tries = 0; $('lv').classList.remove('off'); }
+  } catch (_) { tries++; $('lv').classList.add('off'); }
+  pollT = setTimeout(poll, Math.min(15000, 4000 + tries * 2000));
+}
+
+async function keepAwake(){ try { if ('wakeLock' in navigator) await navigator.wakeLock.request('screen'); } catch (_) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') keepAwake(); });
+
+$('start').onclick = () => {
+  try { audio = new (window.AudioContext || window.webkitAudioContext)(); } catch (_) {}
+  keepAwake();
+  try { document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); } catch (_) {}
+  $('start').classList.add('off');
+};
+
+setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 1000);
+
+if (!DEMO && !S){
+  $('start').innerHTML = '<span class="hop">h<i class="o"></i>p<span class="x">!</span></span><p>Bu ekran kafe ekranındaki Ayarlar bölümünden alınan bağlantıyla açılmalı.</p>';
+} else poll();
+</script>
+</body>
+</html>

@@ -1,0 +1,217 @@
+/**
+ * hop! · osman.algo — Sipariş Çağrı v1
+ * Ücretsiz sürüm — her kafe kendi Google Sheet kopyasında çalıştırır.
+ * Sayfalar: "Siparişler" (kayıtlar) ve "Ayarlar" (işletme adı, ortalama süre, başlangıç no).
+ */
+
+const SH = 'Siparişler';
+const AY = 'Ayarlar';
+
+/* ---------- Menü & kurulum ---------- */
+
+function onOpen() {
+  SpreadsheetApp.getUi()
+    .createMenu('hop!')
+    .addItem('Kurulum (ilk sefer)', 'kurulum')
+    .addItem('30 günden eski kayıtları sil', 'eskiSil')
+    .addItem('PIN sıfırla', 'pinSifirla')
+    .addToUi();
+}
+
+function kurulum() {
+  const ss = SpreadsheetApp.getActive();
+  ss.setSpreadsheetTimeZone('Europe/Istanbul');
+
+  let s = ss.getSheetByName(SH) || ss.insertSheet(SH);
+  s.clear();
+  s.getRange('A:A').setNumberFormat('@'); // tarih metin olarak kalsın
+  s.getRange(1, 1, 1, 5)
+    .setValues([['Tarih', 'No', 'Durum', 'Oluşturma', 'Hazır']])
+    .setFontWeight('bold').setBackground('#111111').setFontColor('#ffffff');
+  s.setFrozenRows(1);
+  s.setColumnWidths(1, 5, 140);
+
+  let a = ss.getSheetByName(AY) || ss.insertSheet(AY);
+  a.clear();
+  a.getRange('A1:B3').setValues([
+    ['İşletme adı', 'Kafem'],
+    ['Ortalama hazırlama (dk)', 8],
+    ['Günlük numara başlangıcı', 1]
+  ]);
+  a.getRange('A1:A3').setFontWeight('bold');
+  a.setColumnWidth(1, 230);
+  a.setColumnWidth(2, 180);
+
+  // Varsayılan boş sayfayı kaldır
+  ss.getSheets().forEach(x => {
+    if (x.getName() !== SH && x.getName() !== AY) ss.deleteSheet(x);
+  });
+  temizle();
+}
+
+function eskiSil() {
+  const s = sh();
+  const n = s.getLastRow();
+  if (n < 2) return;
+  const sinir = Utilities.formatDate(new Date(Date.now() - 30 * 864e5), tz(), 'yyyy-MM-dd');
+  const v = s.getRange(2, 1, n - 1, 1).getValues();
+  for (let i = v.length - 1; i >= 0; i--) {
+    if (fmtD(v[i][0]) < sinir) s.deleteRow(i + 2);
+  }
+  temizle();
+}
+
+function pinSifirla() {
+  PropertiesService.getScriptProperties().deleteProperty('PIN');
+  SpreadsheetApp.getUi().alert('PIN silindi. Kafe ekranını açınca yeni PIN belirleyebilirsiniz.');
+}
+
+/* ---------- Yardımcılar ---------- */
+
+function sh() { return SpreadsheetApp.getActive().getSheetByName(SH); }
+function tz() { return SpreadsheetApp.getActive().getSpreadsheetTimeZone(); }
+function today() { return Utilities.formatDate(new Date(), tz(), 'yyyy-MM-dd'); }
+function fmtD(v) { return v instanceof Date ? Utilities.formatDate(v, tz(), 'yyyy-MM-dd') : String(v); }
+function out(o) {
+  return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON);
+}
+function ckey() { return 'o_' + today(); }
+function temizle() { CacheService.getScriptCache().remove(ckey()); }
+
+function ayar() {
+  const v = SpreadsheetApp.getActive().getSheetByName(AY).getRange('B1:B3').getValues();
+  return {
+    ad: String(v[0][0] || 'Kafe'),
+    dk: Number(v[1][0]) || 8,
+    bas: Number(v[2][0]) || 1
+  };
+}
+
+/** Bugünün siparişleri. taze=true ise önbelleği atlar (yazma işlemleri için). */
+function bugun(taze) {
+  const c = CacheService.getScriptCache();
+  const k = ckey();
+  if (!taze) {
+    const h = c.get(k);
+    if (h) return JSON.parse(h);
+  }
+  const s = sh();
+  const n = s.getLastRow();
+  const t = today();
+  let list = [];
+  if (n > 1) {
+    list = s.getRange(2, 1, n - 1, 5).getValues()
+      .map((r, i) => ({
+        row: i + 2,
+        t: fmtD(r[0]),
+        no: Number(r[1]),
+        d: String(r[2]),
+        c: r[3] ? new Date(r[3]).getTime() : 0,
+        h: r[4] ? new Date(r[4]).getTime() : 0
+      }))
+      .filter(o => o.t === t);
+  }
+  c.put(k, JSON.stringify(list), 30);
+  return list;
+}
+
+/* ---------- İşlemler ---------- */
+
+function yeni() {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const L = bugun(true);
+    const no = L.length ? Math.max.apply(null, L.map(x => x.no)) + 1 : ayar().bas;
+    sh().appendRow(["'" + today(), no, 'hazirlaniyor', new Date(), '']);
+    temizle();
+    return { ok: true, no: no };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+function durumYap(no, d) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(10000);
+  try {
+    const o = bugun(true).find(x => x.no === Number(no));
+    if (!o) return { ok: false, hata: 'yok' };
+    const s = sh();
+    s.getRange(o.row, 3).setValue(d);
+    s.getRange(o.row, 5).setValue(d === 'hazir' ? new Date() : (d === 'hazirlaniyor' ? '' : s.getRange(o.row, 5).getValue()));
+    temizle();
+    return { ok: true };
+  } finally {
+    lock.releaseLock();
+  }
+}
+
+/* ---------- Web uygulaması ---------- */
+
+// Müşteri ve TV ekranı: sadece numara + durum döner (kişisel veri yok)
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  try {
+    const A = ayar();
+
+    if (p.a === 'durum') {
+      const no = Number(p.no);
+      const L = bugun();
+      const o = L.find(x => x.no === no);
+      if (!o) return out({ ok: false, hata: 'yok', ad: A.ad });
+      const sira = L.filter(x => x.d === 'hazirlaniyor' && x.c <= o.c).length;
+      return out({ ok: true, ad: A.ad, no: no, d: o.d, sira: sira, dk: A.dk, c: o.c, h: o.h });
+    }
+
+    if (p.a === 'pano') {
+      const L = bugun();
+      const now = Date.now();
+      return out({
+        ok: true,
+        ad: A.ad,
+        hz: L.filter(x => x.d === 'hazirlaniyor').map(x => x.no),
+        hr: L.filter(x => x.d === 'hazir' && now - x.h < 20 * 60000).map(x => x.no)
+      });
+    }
+
+    return out({ ok: true, ad: A.ad, pinVar: !!PropertiesService.getScriptProperties().getProperty('PIN') });
+  } catch (err) {
+    return out({ ok: false, hata: String(err) });
+  }
+}
+
+// Kafe ekranı: PIN ile korunur
+function doPost(e) {
+  let b = {};
+  try { b = JSON.parse(e.postData.contents); } catch (_) {}
+  try {
+    const P = PropertiesService.getScriptProperties();
+    const pin = P.getProperty('PIN');
+    const gecerli = v => /^\d{4,12}$/.test(String(v || ''));
+
+    if (b.a === 'pinAyarla' && !pin) {
+      if (!gecerli(b.yeni)) return out({ ok: false, hata: 'pin' });
+      P.setProperty('PIN', String(b.yeni));
+      return out({ ok: true, ad: ayar().ad });
+    }
+    if (!pin) return out({ ok: false, hata: 'pinYok' });
+    if (String(b.pin) !== pin) return out({ ok: false, hata: 'pinYanlis' });
+
+    switch (b.a) {
+      case 'giris':  return out({ ok: true, ad: ayar().ad });
+      case 'liste':  return out({ ok: true, l: bugun() });
+      case 'yeni':   return out(yeni());
+      case 'hazir':  return out(durumYap(b.no, 'hazir'));
+      case 'teslim': return out(durumYap(b.no, 'teslim'));
+      case 'geri':   return out(durumYap(b.no, 'hazirlaniyor'));
+      case 'pinDegistir':
+        if (!gecerli(b.yeni)) return out({ ok: false, hata: 'pin' });
+        P.setProperty('PIN', String(b.yeni));
+        return out({ ok: true });
+    }
+    return out({ ok: false, hata: 'islem' });
+  } catch (err) {
+    return out({ ok: false, hata: String(err) });
+  }
+}

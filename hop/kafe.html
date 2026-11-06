@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title>hop! · Kafe Ekranı</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0c10; --card:#12151b; --card2:#171b22; --line:#1f242d; --tx:#f2f4f7; --mut:#8a93a3;
+  --amb:#ffb020; --amb2:#ff7a1a; --grn:#1ee38a; --grn2:#0bbf6e; --red:#ff5468;
+  --hd:'Space Grotesk',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--tx);font-family:Inter,system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+.scr{display:none;min-height:100%}
+.scr.on{display:flex}
+.center{flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;text-align:center}
+.brand{font:700 14px var(--hd);letter-spacing:.16em;text-transform:uppercase;color:var(--mut)}
+h2{font:700 30px var(--hd)}
+.hint{color:var(--mut);font-size:14.5px;line-height:1.55;max-width:420px}
+.inp{width:min(100%,460px);background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;color:var(--tx);font:500 15px Inter;outline:none}
+.inp:focus{border-color:var(--amb)}
+.btn{border-radius:16px;padding:17px 28px;font-weight:600;font-size:16px;transition:transform .12s,filter .2s}
+.btn:active{transform:scale(.96)}
+.pri{background:linear-gradient(135deg,var(--amb),var(--amb2));color:#111;box-shadow:0 10px 30px -12px rgba(255,140,26,.7)}
+.gh{background:var(--card2);border:1px solid var(--line)}
+.err{color:var(--red);font-size:14px;min-height:20px}
+
+/* PIN klavyesi */
+.dots{display:flex;gap:14px;height:22px}
+.dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--line);transition:.15s}
+.dots i.f{background:var(--amb);border-color:var(--amb);transform:scale(1.1)}
+.pad{display:grid;grid-template-columns:repeat(3,84px);gap:14px}
+.pad button{height:84px;border-radius:50%;background:var(--card);border:1px solid var(--line);font:600 28px var(--hd);transition:background .1s}
+.pad button:active{background:var(--line)}
+.pad .k{font-size:15px;color:var(--mut)}
+.shake{animation:sh .4s}
+@keyframes sh{20%,60%{transform:translateX(-10px)}40%,80%{transform:translateX(10px)}}
+
+/* Ana ekran */
+#main{flex-direction:column;height:100vh;height:100dvh}
+header{display:flex;align-items:center;gap:16px;padding:18px 24px;border-bottom:1px solid var(--line)}
+header .t{flex:1;display:flex;flex-direction:column;gap:3px}
+header .t b{font:700 20px var(--hd)}
+header .t small{color:var(--mut);font-size:13px;display:flex;align-items:center;gap:7px}
+.lv{width:8px;height:8px;border-radius:50%;background:var(--grn);box-shadow:0 0 10px var(--grn)}
+.lv.off{background:var(--red);box-shadow:none}
+.clock{font:700 22px var(--hd);font-variant-numeric:tabular-nums;color:var(--mut)}
+.ico{width:48px;height:48px;border-radius:14px;background:var(--card);border:1px solid var(--line);display:grid;place-items:center}
+.ico svg{width:22px;stroke:var(--mut);fill:none;stroke-width:2}
+.new{display:flex;align-items:center;gap:10px;padding:16px 26px;font-size:17px}
+.new span{font-size:26px;line-height:0;margin-top:-2px}
+.cols{flex:1;display:grid;grid-template-columns:1fr 1fr;min-height:0}
+.col{display:flex;flex-direction:column;min-height:0;padding:18px 20px 20px}
+.col+.col{border-left:1px solid var(--line);background:linear-gradient(180deg,rgba(30,227,138,.04),transparent 40%)}
+.ch{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.ch h3{font:700 15px var(--hd);letter-spacing:.12em;text-transform:uppercase}
+.ch .n{font:700 13px var(--hd);background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:3px 10px;color:var(--mut)}
+.c1 h3{color:var(--amb)} .c2 h3{color:var(--grn)}
+.list{flex:1;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:12px;align-content:start;padding-bottom:10px}
+.empty{grid-column:1/-1;border:1.5px dashed var(--line);border-radius:18px;padding:34px 16px;text-align:center;color:var(--mut);font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:pop .35s cubic-bezier(.2,.9,.3,1.3)}
+@keyframes pop{from{opacity:0;transform:scale(.9)}}
+.card .top{display:flex;align-items:flex-start;justify-content:space-between}
+.card .no{font:700 46px/1 var(--hd);font-variant-numeric:tabular-nums}
+.card .tm{font:600 13px var(--hd);font-variant-numeric:tabular-nums;color:var(--mut);background:var(--card2);padding:5px 9px;border-radius:9px}
+.card .tm.late{color:var(--red);background:rgba(255,84,104,.12)}
+.card .qr{color:var(--mut);font-size:12px;text-decoration:underline;text-underline-offset:3px;align-self:flex-start}
+.card .act{display:flex;gap:8px}
+.card .act button{flex:1;padding:14px 10px;border-radius:14px;font-weight:600;font-size:15px}
+.b-ready{background:var(--grn2);color:#04170d}
+.b-done{background:var(--tx);color:#111}
+.b-back{flex:0 0 auto!important;background:var(--card2);border:1px solid var(--line);color:var(--mut)}
+.card.r{border-color:rgba(30,227,138,.35);box-shadow:0 0 0 1px rgba(30,227,138,.08),0 12px 30px -18px rgba(30,227,138,.6)}
+.card.r .no{color:var(--grn)}
+.ring{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--grn)}
+.ring i{width:7px;height:7px;border-radius:50%;background:var(--grn);animation:bl 1s infinite}
+@keyframes bl{50%{opacity:.2}}
+footer{padding:10px 24px;border-top:1px solid var(--line);color:var(--mut);font-size:12.5px;display:flex;justify-content:space-between}
+
+
+/* hop! logosu — "o" zıplayan top */
+.hop{font:700 22px/1 'Space Grotesk',system-ui,sans-serif;display:inline-flex;align-items:baseline;letter-spacing:-.03em;color:var(--tx)}
+.hop .o{display:inline-block;width:.5em;height:.5em;border:.13em solid currentColor;border-radius:50%;margin:0 .03em;transform-origin:50% 100%;animation:hopb 1.5s cubic-bezier(.35,0,.25,1) infinite}
+.hop .x{color:var(--amb);display:inline-block;transform-origin:50% 100%;animation:hopx 1.5s ease-in-out infinite}
+@keyframes hopb{0%,100%{transform:translateY(0) scale(1.18,.78)}12%{transform:translateY(0) scale(1)}45%{transform:translateY(-.42em) scale(.95,1.05)}78%{transform:translateY(0) scale(1)}}
+@keyframes hopx{0%,40%,100%{transform:rotate(0)}55%{transform:rotate(12deg)}70%{transform:rotate(-6deg)}}
+.pw-unused{position:fixed;left:0;right:0;bottom:calc(14px + env(safe-area-inset-bottom));text-align:center;font-size:12px;color:var(--mut);text-decoration:none;display:flex;justify-content:center;align-items:baseline;gap:6px}
+.pw .hop{font-size:14px;color:var(--mut)}
+
+.bighop .hop{font-size:64px}
+header .hop{font-size:24px}
+/* Modallar */
+.ov{position:fixed;inset:0;background:rgba(5,6,9,.78);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.ov.on{display:flex;animation:fd .2s}
+@keyframes fd{from{opacity:0}}
+.mod{background:var(--card);border:1px solid var(--line);border-radius:28px;padding:28px;width:min(100%,460px);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;animation:up .35s cubic-bezier(.2,.9,.3,1.2)}
+@keyframes up{from{transform:translateY(30px) scale(.96);opacity:0}}
+.mod .lbl{font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut)}
+.mod .big{font:700 84px/1 var(--hd);font-variant-numeric:tabular-nums;background:linear-gradient(135deg,var(--amb),var(--amb2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.qrbox{background:#fff;border-radius:22px;padding:14px;width:min(100%,290px);aspect-ratio:1}
+.qrbox svg{width:100%;height:100%;display:block}
+.bar{width:100%;height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--amb);transform-origin:left;animation:cd linear forwards}
+@keyframes cd{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+.ld{display:inline-flex;gap:10px;height:84px;align-items:center}
+.ld i{width:16px;height:16px;border-radius:50%;background:var(--amb);animation:ldb 1s infinite ease-in-out}
+.ld i:nth-child(2){animation-delay:.15s}.ld i:nth-child(3){animation-delay:.3s}
+@keyframes ldb{0%,80%,100%{transform:translateY(0);opacity:.35}40%{transform:translateY(-18px);opacity:1}}
+.qsk{width:100%;height:100%;border-radius:10px;background:linear-gradient(110deg,#eceef1 30%,#f8f9fa 50%,#eceef1 70%);background-size:200% 100%;animation:sk 1.2s linear infinite}
+@keyframes sk{to{background-position:-200% 0}}
+.row{display:flex;gap:10px;width:100%}
+.row .btn{flex:1}
+.set{width:100%;display:flex;flex-direction:column;gap:10px;text-align:left}
+.set label{font-size:13px;color:var(--mut)}
+.set .line{display:flex;gap:8px}
+.set .line .inp{flex:1;width:auto;padding:13px}
+.set .line .btn{padding:13px 18px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--tx);color:#111;padding:12px 20px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;transition:.25s;z-index:20;pointer-events:none}
+.toast.on{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:760px){
+  .cols{display:block;overflow-y:auto}
+  .col{min-height:auto}
+  .col+.col{border-left:0;border-top:1px solid var(--line)}
+  .list{overflow:visible}
+  .clock{display:none}
+  header{padding:14px 16px;gap:10px}
+  .new{padding:14px 18px}
+  .new b{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- 1. Bağlantı kurulumu (ilk sefer) -->
+<section class="scr center" id="setup">
+  <div class="bighop"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
+  <h2>Kafe ekranını bağlayın</h2>
+  <p class="hint">Google Sheet'te yayınladığınız web uygulaması bağlantısını yapıştırın. Bu cihaz bağlantıyı hatırlar, bir daha sorulmaz.</p>
+  <input class="inp" id="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
+  <div class="err" id="uErr"></div>
+  <button class="btn pri" id="uGo">Bağlan</button>
+</section>
+
+<!-- 2. PIN -->
+<section class="scr center" id="pin">
+  <div class="bighop" style="margin-bottom:-4px"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
+  <div class="brand" id="pAd">…</div>
+  <h2 id="pT">PIN girin</h2>
+  <p class="hint" id="pH">Kafe ekranı PIN ile korunur.</p>
+  <div class="dots" id="dots"></div>
+  <div class="err" id="pErr"></div>
+  <div class="pad" id="pad"></div>
+</section>
+
+<!-- 3. Ana ekran -->
+<section class="scr" id="main">
+  <header>
+    <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+    <div class="t" style="padding-left:14px;border-left:1px solid var(--line)"><b id="mAd">Kafem</b><small><i class="lv" id="lv"></i><span id="lvT">Canlı</span></small></div>
+    <div class="clock" id="clock">--:--</div>
+    <button class="ico" id="gear" aria-label="Ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="btn pri new" id="nNew"><span>+</span> <b>Yeni sipariş</b></button>
+  </header>
+  <div class="cols">
+    <div class="col c1"><div class="ch"><h3>Hazırlanıyor</h3><span class="n" id="n1">0</span></div><div class="list" id="l1"></div></div>
+    <div class="col c2"><div class="ch"><h3>Hazır · çağrılıyor</h3><span class="n" id="n2">0</span></div><div class="list" id="l2"></div></div>
+  </div>
+  <footer><span id="fStat">Bugün 0 sipariş teslim edildi</span><a href="https://osmanalgo.github.io/hop/kurulum/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">hop! · osman.algo</a></footer>
+</section>
+
+<!-- QR modal -->
+<div class="ov" id="qOv">
+  <div class="mod">
+    <div class="lbl">Sipariş numarası</div>
+    <div class="big" id="qNo">–</div>
+    <div class="qrbox" id="qBox"></div>
+    <p class="hint" id="qHint">Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.</p>
+    <div class="bar"><i id="qBar"></i></div>
+    <button class="btn gh" id="qClose" style="width:100%">Kapat</button>
+  </div>
+</div>
+
+<!-- Ayarlar modal -->
+<div class="ov" id="sOv">
+  <div class="mod">
+    <h2 style="font-size:24px">Ayarlar</h2>
+    <div class="set">
+      <label>TV / bekleme ekranı bağlantısı</label>
+      <div class="line"><input class="inp" id="tvUrl" readonly><button class="btn gh" id="tvCopy">Kopyala</button></div>
+      <label>PIN değiştir (4–12 rakam)</label>
+      <div class="line"><input class="inp" id="nPin" inputmode="numeric" maxlength="12" placeholder="Yeni PIN"><button class="btn gh" id="pSave">Kaydet</button></div>
+      <div class="err" id="sErr"></div>
+    </div>
+    <div class="row">
+      <button class="btn gh" id="logout">Çıkış yap</button>
+      <button class="btn gh" id="unlink">Bağlantıyı değiştir</button>
+    </div>
+    <button class="btn pri" id="sClose" style="width:100%">Tamam</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="qr.js"></script>
+<script>
+const q = new URLSearchParams(location.search), DEMO = q.has('demo');
+const $ = id => document.getElementById(id);
+const LS = {
+  get: k => { try { return localStorage.getItem('pgr_' + k); } catch (_) { return null; } },
+  set: (k, v) => { try { localStorage.setItem('pgr_' + k, v); } catch (_) {} },
+  del: k => { try { localStorage.removeItem('pgr_' + k); } catch (_) {} }
+};
+let SID = q.get('s') || LS.get('sid'), PIN = LS.get('pin'), AD = '', L = [], pollT, qT;
+
+const API = () => 'https://script.google.com/macros/s/' + SID + '/exec';
+const custUrl = no => new URL('musteri.html?s=' + encodeURIComponent(SID || 'demo') + '&n=' + no + (DEMO ? '&demo=1' : ''), location.href).href;
+const tvUrl = () => new URL('tv.html?s=' + encodeURIComponent(SID || 'demo') + (DEMO ? '&demo=1' : ''), location.href).href;
+
+function show(id){ document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); }
+function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2200); }
+
+/* ---------- Demo verisi ---------- */
+const D = (() => {
+  const m = 60000, n = Date.now();
+  return { L: [
+    { no: 21, d: 'teslim', c: n - 30*m, h: n - 20*m },
+    { no: 22, d: 'teslim', c: n - 22*m, h: n - 14*m },
+    { no: 23, d: 'hazir', c: n - 12*m, h: n - 1*m },
+    { no: 24, d: 'hazirlaniyor', c: n - 9*m, h: 0 },
+    { no: 25, d: 'hazirlaniyor', c: n - 5*m, h: 0 },
+    { no: 26, d: 'hazirlaniyor', c: n - 2*m, h: 0 }
+  ]};
+})();
+function demo(b){
+  const o = D.L.find(x => x.no === Number(b.no));
+  switch (b.a){
+    case 'giris': case 'pinAyarla': return { ok: true, ad: 'Kafem' };
+    case 'liste': return { ok: true, l: D.L.map(x => ({ ...x })) };
+    case 'yeni': { const no = Math.max(...D.L.map(x => x.no)) + 1; D.L.push({ no, d: 'hazirlaniyor', c: Date.now(), h: 0 }); return { ok: true, no }; }
+    case 'hazir': o.d = 'hazir'; o.h = Date.now(); return { ok: true };
+    case 'teslim': o.d = 'teslim'; return { ok: true };
+    case 'geri': o.d = 'hazirlaniyor'; o.h = 0; return { ok: true };
+    case 'pinDegistir': return { ok: true };
+  }
+}
+
+/* ---------- Sunucu ---------- */
+async function post(b){
+  if (DEMO) return demo(b);
+  const r = await fetch(API(), { method: 'POST', body: JSON.stringify({ ...b, pin: PIN }) });
+  return r.json();
+}
+async function info(){
+  if (DEMO) return { ok: true, ad: 'Kafem', pinVar: true };
+  const r = await fetch(API() + '?_=' + Date.now());
+  return r.json();
+}
+
+/* ---------- 1. Kurulum ---------- */
+function parseSid(v){
+  v = (v || '').trim();
+  const m = v.match(/\/macros\/s\/([A-Za-z0-9_-]{20,})/);
+  if (m) return m[1];
+  return /^[A-Za-z0-9_-]{20,}$/.test(v) ? v : null;
+}
+$('uGo').onclick = async () => {
+  const s = parseSid($('url').value);
+  $('uErr').textContent = '';
+  if (!s) return $('uErr').textContent = 'Bağlantı tanınmadı. "/exec" ile biten adresi yapıştırın.';
+  SID = s; $('uGo').textContent = 'Kontrol ediliyor…';
+  try {
+    const o = await info();
+    if (!o.ok) throw 0;
+    LS.set('sid', SID); start(o);
+  } catch (_) {
+    $('uErr').textContent = 'Bağlanılamadı. Dağıtımda erişimin "Herkes" olduğundan emin olun.';
+  }
+  $('uGo').textContent = 'Bağlan';
+};
+
+/* ---------- 2. PIN ---------- */
+let entry = '', setMode = false, first = '';
+function drawDots(){
+  const n = Math.max(4, entry.length);
+  $('dots').innerHTML = Array.from({ length: n }, (_, i) => '<i class="' + (i < entry.length ? 'f' : '') + '"></i>').join('');
+}
+function buildPad(){
+  const k = ['1','2','3','4','5','6','7','8','9','sil','0','tamam'];
+  $('pad').innerHTML = k.map(x => '<button data-k="' + x + '" class="' + (x.length > 1 ? 'k' : '') + '">' + (x === 'sil' ? '⌫' : x === 'tamam' ? 'Tamam' : x) + '</button>').join('');
+  $('pad').onclick = e => {
+    const b = e.target.closest('button'); if (!b) return;
+    const x = b.dataset.k; $('pErr').textContent = '';
+    if (x === 'sil') entry = entry.slice(0, -1);
+    else if (x === 'tamam') return submitPin();
+    else if (entry.length < 12) entry += x;
+    drawDots();
+  };
+}
+function pinFail(t){ $('pErr').textContent = t; entry = ''; drawDots(); $('dots').classList.remove('shake'); void $('dots').offsetWidth; $('dots').classList.add('shake'); }
+async function submitPin(){
+  if (entry.length < 4) return pinFail('En az 4 rakam');
+  if (setMode){
+    if (!first){ first = entry; entry = ''; drawDots(); $('pT').textContent = 'PIN tekrar'; $('pH').textContent = 'Aynı PIN\'i bir kez daha girin.'; return; }
+    if (first !== entry){ first = ''; $('pT').textContent = 'PIN belirleyin'; return pinFail('PIN\'ler eşleşmedi'); }
+    const o = await post({ a: 'pinAyarla', yeni: entry });
+    if (!o.ok) return pinFail('Kaydedilemedi');
+    PIN = entry;
+  } else {
+    PIN = entry;
+    const o = await post({ a: 'giris' }).catch(() => ({ ok: false, hata: 'ag' }));
+    if (!o.ok) return pinFail(o.hata === 'ag' ? 'Bağlantı hatası' : 'PIN yanlış');
+  }
+  LS.set('pin', PIN); entry = ''; openMain();
+}
+function askPin(o){
+  $('pAd').textContent = o.ad || '';
+  setMode = !o.pinVar; first = ''; entry = '';
+  $('pT').textContent = setMode ? 'PIN belirleyin' : 'PIN girin';
+  $('pH').textContent = setMode ? 'Kafe ekranını korumak için 4–12 haneli bir PIN seçin.' : 'Kafe ekranı PIN ile korunur.';
+  buildPad(); drawDots(); show('pin');
+}
+
+/* ---------- 3. Ana ekran ---------- */
+const mins = t => Math.max(0, Math.floor((Date.now() - t) / 60000));
+function cardPrep(o){
+  const m = mins(o.c);
+  return '<div class="card" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm' + (m >= 15 ? ' late' : '') + '">' + m + ' dk</div></div>' +
+    '<button class="qr" data-a="qr">QR göster</button>' +
+    '<div class="act"><button class="b-ready" data-a="hazir">Hazır ✓</button></div></div>';
+}
+function cardReady(o){
+  return '<div class="card r" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm">' + mins(o.h) + ' dk</div></div>' +
+    '<span class="ring"><i></i>Müşteri çağrılıyor</span>' +
+    '<div class="act"><button class="b-back" data-a="geri">Geri al</button><button class="b-done" data-a="teslim">Teslim edildi</button></div></div>';
+}
+function render(){
+  const p = L.filter(x => x.d === 'hazirlaniyor').sort((a, b) => a.c - b.c);
+  const r = L.filter(x => x.d === 'hazir').sort((a, b) => a.h - b.h);
+  const t = L.filter(x => x.d === 'teslim').length;
+  $('n1').textContent = p.length; $('n2').textContent = r.length;
+  $('l1').innerHTML = p.length ? p.map(cardPrep).join('') : '<div class="empty">Bekleyen sipariş yok.<br>"Yeni sipariş" ile başlayın.</div>';
+  $('l2').innerHTML = r.length ? r.map(cardReady).join('') : '<div class="empty">Hazır sipariş yok.</div>';
+  $('fStat').textContent = 'Bugün ' + t + ' sipariş teslim edildi';
+}
+async function refresh(){
+  clearTimeout(pollT);
+  try {
+    const o = await post({ a: 'liste' });
+    if (!o.ok && o.hata === 'pinYanlis'){ LS.del('pin'); PIN = null; return start(); }
+    if (o.ok){ L = o.l; render(); }
+    $('lv').classList.remove('off'); $('lvT').textContent = 'Canlı';
+  } catch (_) {
+    $('lv').classList.add('off'); $('lvT').textContent = 'Bağlantı yok, tekrar deneniyor';
+  }
+  pollT = setTimeout(refresh, 6000);
+}
+async function act(a, no){
+  const o = L.find(x => x.no === no); if (!o) return;
+  const prev = { d: o.d, h: o.h };
+  o.d = a === 'geri' ? 'hazirlaniyor' : a; if (a === 'hazir') o.h = Date.now();
+  render();
+  try {
+    const r = await post({ a, no });
+    if (!r.ok) throw 0;
+    if (a === 'hazir') toast('hop! #' + no + ' çağrıldı');
+  } catch (_) { Object.assign(o, prev); render(); toast('İşlem yapılamadı, tekrar deneyin'); }
+}
+document.querySelector('.cols').onclick = e => {
+  const b = e.target.closest('button[data-a]'); if (!b) return;
+  const no = Number(b.closest('.card').dataset.no);
+  if (b.dataset.a === 'qr') return showQr(no);
+  act(b.dataset.a, no);
+};
+$('nNew').onclick = async () => {
+  const b = $('nNew'); if (b.disabled) return;
+  b.disabled = true; b.style.filter = 'brightness(.7)';
+  openWait();
+  try {
+    const o = await post({ a: 'yeni' });
+    if (!o.ok) throw 0;
+    L.push({ no: o.no, d: 'hazirlaniyor', c: Date.now(), h: 0 }); render(); showQr(o.no);
+  } catch (_) { closeQr(); toast('Sipariş oluşturulamadı, tekrar deneyin'); }
+  b.disabled = false; b.style.filter = '';
+};
+
+/* Bekleme: modal hemen açılır, numara gelince QR çizilir */
+function openWait(){
+  clearTimeout(qT);
+  $('qNo').innerHTML = '<span class="ld"><i></i><i></i><i></i></span>';
+  $('qBox').innerHTML = '<div class="qsk"></div>';
+  $('qHint').textContent = 'Sipariş numarası alınıyor…';
+  const bar = $('qBar'); bar.style.animation = 'none'; bar.parentNode.style.opacity = 0;
+  $('qOv').classList.add('on');
+}
+
+/* QR */
+function showQr(no){
+  $('qNo').textContent = no;
+  $('qHint').textContent = 'Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.';
+  const g = qrcode(0, 'M'); g.addData(custUrl(no)); g.make();
+  $('qBox').innerHTML = g.createSvgTag({ cellSize: 8, margin: 1, scalable: true });
+  const bar = $('qBar'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = 'cd 25s linear forwards'; bar.parentNode.style.opacity = 1;
+  $('qOv').classList.add('on');
+  clearTimeout(qT); qT = setTimeout(closeQr, 25000);
+}
+function closeQr(){ $('qOv').classList.remove('on'); clearTimeout(qT); }
+$('qClose').onclick = closeQr;
+$('qOv').onclick = e => { if (e.target.id === 'qOv') closeQr(); };
+
+/* Ayarlar */
+$('gear').onclick = () => { $('tvUrl').value = tvUrl(); $('nPin').value = ''; $('sErr').textContent = ''; $('sOv').classList.add('on'); };
+$('sClose').onclick = () => $('sOv').classList.remove('on');
+$('tvCopy').onclick = async () => { try { await navigator.clipboard.writeText($('tvUrl').value); toast('Kopyalandı'); } catch (_) { $('tvUrl').select(); } };
+$('pSave').onclick = async () => {
+  const v = $('nPin').value.trim();
+  if (!/^\d{4,12}$/.test(v)) return $('sErr').textContent = 'PIN 4–12 rakam olmalı';
+  const o = await post({ a: 'pinDegistir', yeni: v }).catch(() => ({ ok: false }));
+  if (!o.ok) return $('sErr').textContent = 'Kaydedilemedi';
+  PIN = v; LS.set('pin', v); $('nPin').value = ''; toast('PIN değiştirildi');
+};
+$('logout').onclick = () => { LS.del('pin'); PIN = null; $('sOv').classList.remove('on'); start(); };
+$('unlink').onclick = () => { LS.del('pin'); LS.del('sid'); SID = null; PIN = null; $('sOv').classList.remove('on'); start(); };
+
+/* Saat */
+setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 1000);
+setInterval(() => { if ($('main').classList.contains('on')) render(); }, 30000);
+
+/* ---------- Başlangıç ---------- */
+function openMain(){ $('mAd').textContent = AD || 'Kafem'; show('main'); refresh(); }
+async function start(o){
+  clearTimeout(pollT);
+  if (!SID && !DEMO) return show('setup');
+  try { o = o || await info(); } catch (_) { return show('setup'); }
+  if (!o.ok) return show('setup');
+  AD = o.ad || '';
+  if (!o.pinVar || !PIN) return askPin(o);
+  const g = await post({ a: 'giris' }).catch(() => ({ ok: false }));
+  if (!g.ok){ LS.del('pin'); PIN = null; return askPin(o); }
+  openMain();
+}
+if (DEMO){ PIN = '0000'; }
+start();
+</script>
+</body>
+</html>
