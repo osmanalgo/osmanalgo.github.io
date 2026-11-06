@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
 <title>hop! · Sipariş Ekranı</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -82,6 +82,11 @@ footer b{color:var(--tx);font-weight:600}
   .c1 .n{font-size:4vh;width:10vh;height:8vh}
   .c2 .n{font-size:7vh;width:16vh;height:12vh}
 }
+
+/* uygulama hissi: yenileme çekmesi, yakınlaştırma, uzun basma menüsü kapalı */
+html,body{overscroll-behavior:none;overscroll-behavior-y:none;touch-action:manipulation;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+input,textarea{font-size:16px!important;user-select:text;-webkit-user-select:text}
+img,svg{-webkit-user-drag:none;user-select:none}
 </style>
 </head>
 <body>
@@ -195,6 +200,11 @@ setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-T
 if (!DEMO && !S){
   $('start').innerHTML = '<span class="hop">h<i class="o"></i>p<span class="x">!</span></span><p>Bu ekran kafe ekranındaki Ayarlar bölümünden alınan bağlantıyla açılmalı.</p>';
 } else poll();
+</script>
+<script>
+document.addEventListener('contextmenu', e => { if (!e.target.closest('input,textarea')) e.preventDefault(); });
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
 </script>
 </body>
 </html>

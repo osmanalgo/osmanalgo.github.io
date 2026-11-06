@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
 <title>hop! · Kafe Ekranı</title>
 <link rel="icon" href="icon-192.png">
@@ -167,6 +167,11 @@ header .hop{font-size:24px}
   .new{padding:14px 18px}
   .new b{display:none}
 }
+
+/* uygulama hissi: yenileme çekmesi, yakınlaştırma, uzun basma menüsü kapalı */
+html,body{overscroll-behavior:none;overscroll-behavior-y:none;touch-action:manipulation;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
+input,textarea{font-size:16px!important;user-select:text;-webkit-user-select:text}
+img,svg{-webkit-user-drag:none;user-select:none}
 </style>
 </head>
 <body>
@@ -176,7 +181,7 @@ header .hop{font-size:24px}
   <div class="bighop"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
   <h2>Kafe ekranını bağlayın</h2>
   <p class="hint">Google Sheet'te yayınladığınız web uygulaması bağlantısını yapıştırın. Bu cihaz bağlantıyı hatırlar, bir daha sorulmaz.</p>
-  <input class="inp" id="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
+  <input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
   <div class="err" id="uErr"></div>
   <button class="btn pri" id="uGo">Bağlan</button>
 </section>
@@ -219,7 +224,7 @@ header .hop{font-size:24px}
     <div class="fx" id="qFx">
       <label>Hazırlama süresi</label>
       <div class="chips" id="qDk"></div>
-      <input class="inp" id="qNot" maxlength="140" placeholder="Not (isteğe bağlı): 2 latte, masa 5…" autocomplete="off">
+      <input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="qNot" maxlength="140" placeholder="Not (isteğe bağlı): 2 latte, masa 5…" autocomplete="off">
     </div>
     <div class="row">
       <button class="btn gh cx" id="qCancel">İptal et</button>
@@ -234,9 +239,9 @@ header .hop{font-size:24px}
     <h2 style="font-size:24px">Ayarlar</h2>
     <div class="set">
       <label>TV / bekleme ekranı bağlantısı</label>
-      <div class="line"><input class="inp" id="tvUrl" readonly><button class="btn gh" id="tvCopy">Kopyala</button></div>
+      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="tvUrl" readonly><button class="btn gh" id="tvCopy">Kopyala</button></div>
       <label>PIN değiştir (4–12 rakam)</label>
-      <div class="line"><input class="inp" id="nPin" inputmode="numeric" maxlength="12" placeholder="Yeni PIN"><button class="btn gh" id="pSave">Kaydet</button></div>
+      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="nPin" inputmode="numeric" maxlength="12" placeholder="Yeni PIN"><button class="btn gh" id="pSave">Kaydet</button></div>
       <div class="err" id="sErr"></div>
     </div>
     <div class="row">
@@ -554,6 +559,11 @@ async function start(o){
 }
 if (DEMO){ PIN = '0000'; }
 start();
+</script>
+<script>
+document.addEventListener('contextmenu', e => { if (!e.target.closest('input,textarea')) e.preventDefault(); });
+document.addEventListener('gesturestart', e => e.preventDefault());
+document.addEventListener('dblclick', e => e.preventDefault(), { passive: false });
 </script>
 </body>
 </html>
