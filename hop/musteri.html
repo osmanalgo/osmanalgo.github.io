@@ -229,6 +229,9 @@ function render(o){
       show('ready'); document.body.classList.add('ready'); startRing();
     }
     $('rNo').textContent = o.no;
+  } else if (o.d === 'iptal'){
+    stopRing(); document.body.classList.remove('ready');
+    err('Sipariş iptal edildi', 'Bu sipariş kafe tarafından iptal edildi. Bir sorun varsa kasaya danışın.');
   } else if (o.d === 'teslim'){
     stopRing(); document.body.classList.remove('ready');
     $('dAd').textContent = (ad ? ad + ' · ' : '') + 'Bizi tercih ettiğiniz için teşekkürler.';
@@ -243,7 +246,7 @@ async function poll(){
     tries = 0; $('live').classList.remove('off'); $('liveT').textContent = 'Canlı takip açık';
     if (!o.ok){ return err('Sipariş bulunamadı', 'Numara bugün için kayıtlı değil. QR kodu tekrar okutun ya da kasaya danışın.'); }
     render(o);
-    if (o.d === 'teslim') return;
+    if (o.d === 'teslim' || o.d === 'iptal') return;
   }catch(_){
     tries++; $('live').classList.add('off'); $('liveT').textContent = 'Bağlantı bekleniyor…';
   }

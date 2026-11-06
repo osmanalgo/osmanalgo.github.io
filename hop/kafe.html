@@ -115,6 +115,19 @@ header .hop{font-size:24px}
 .qsk{width:100%;height:100%;border-radius:10px;background:linear-gradient(110deg,#eceef1 30%,#f8f9fa 50%,#eceef1 70%);background-size:200% 100%;animation:sk 1.2s linear infinite}
 @keyframes sk{to{background-position:-200% 0}}
 .row{display:flex;gap:10px;width:100%}
+.qrbox{width:min(100%,230px)!important}
+.fx{width:100%;display:flex;flex-direction:column;gap:9px;text-align:left}
+.fx label{font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chips button{flex:1;min-width:54px;padding:12px 0;border-radius:12px;background:var(--card2);border:1px solid var(--line);font:700 16px var(--hd);color:var(--tx)}
+.chips button.on{background:var(--amb);border-color:var(--amb);color:#111}
+.fx .inp{width:100%;padding:13px}
+.cx{color:var(--red)!important}
+.cx.sure{background:var(--red)!important;color:#fff!important;border-color:var(--red)!important}
+.card .nt{font-size:13.5px;color:var(--tx);background:var(--card2);border-radius:10px;padding:8px 10px;line-height:1.35;word-break:break-word}
+.card .cn{color:var(--mut);font-size:12px;text-decoration:underline;text-underline-offset:3px}
+.card .cn.sure{color:var(--red);text-decoration:none;font-weight:600}
+.card .lk{display:flex;justify-content:space-between;align-items:center}
 .row .btn{flex:1}
 .set{width:100%;display:flex;flex-direction:column;gap:10px;text-align:left}
 .set label{font-size:13px;color:var(--mut)}
@@ -182,8 +195,16 @@ header .hop{font-size:24px}
     <div class="big" id="qNo">–</div>
     <div class="qrbox" id="qBox"></div>
     <p class="hint" id="qHint">Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.</p>
-    <div class="bar"><i id="qBar"></i></div>
-    <button class="btn gh" id="qClose" style="width:100%">Kapat</button>
+    <div class="bar" style="display:none"><i id="qBar"></i></div>
+    <div class="fx" id="qFx">
+      <label>Hazırlama süresi</label>
+      <div class="chips" id="qDk"></div>
+      <input class="inp" id="qNot" maxlength="140" placeholder="Not (isteğe bağlı): 2 latte, masa 5…" autocomplete="off">
+    </div>
+    <div class="row">
+      <button class="btn gh cx" id="qCancel">İptal et</button>
+      <button class="btn pri" id="qClose">Tamam</button>
+    </div>
   </div>
 </div>
 
@@ -233,9 +254,9 @@ const D = (() => {
     { no: 21, d: 'teslim', c: n - 30*m, h: n - 20*m },
     { no: 22, d: 'teslim', c: n - 22*m, h: n - 14*m },
     { no: 23, d: 'hazir', c: n - 12*m, h: n - 1*m },
-    { no: 24, d: 'hazirlaniyor', c: n - 9*m, h: 0 },
-    { no: 25, d: 'hazirlaniyor', c: n - 5*m, h: 0 },
-    { no: 26, d: 'hazirlaniyor', c: n - 2*m, h: 0 }
+    { no: 24, d: 'hazirlaniyor', c: n - 12*m, h: 0, dk: 10, not: '2 latte, 1 tost' },
+    { no: 25, d: 'hazirlaniyor', c: n - 5*m, h: 0, dk: 15, not: 'Masa 5 · acısız' },
+    { no: 26, d: 'hazirlaniyor', c: n - 2*m, h: 0, dk: 5, not: '' }
   ]};
 })();
 function demo(b){
@@ -243,10 +264,12 @@ function demo(b){
   switch (b.a){
     case 'giris': case 'pinAyarla': return { ok: true, ad: 'Kafem' };
     case 'liste': return { ok: true, l: D.L.map(x => ({ ...x })) };
-    case 'yeni': { const no = Math.max(...D.L.map(x => x.no)) + 1; D.L.push({ no, d: 'hazirlaniyor', c: Date.now(), h: 0 }); return { ok: true, no }; }
+    case 'yeni': { const no = Math.max(...D.L.map(x => x.no)) + 1; D.L.push({ no, d: 'hazirlaniyor', c: Date.now(), h: 0, dk: 10, not: '' }); return { ok: true, no }; }
     case 'hazir': o.d = 'hazir'; o.h = Date.now(); return { ok: true };
     case 'teslim': o.d = 'teslim'; return { ok: true };
     case 'geri': o.d = 'hazirlaniyor'; o.h = 0; return { ok: true };
+    case 'iptal': o.d = 'iptal'; return { ok: true };
+    case 'detay': o.dk = b.dk; o.not = b.not; return { ok: true };
     case 'pinDegistir': return { ok: true };
   }
 }
@@ -329,10 +352,12 @@ function askPin(o){
 
 /* ---------- 3. Ana ekran ---------- */
 const mins = t => Math.max(0, Math.floor((Date.now() - t) / 60000));
+const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 function cardPrep(o){
-  const m = mins(o.c);
-  return '<div class="card" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm' + (m >= 15 ? ' late' : '') + '">' + m + ' dk</div></div>' +
-    '<button class="qr" data-a="qr">QR göster</button>' +
+  const m = mins(o.c), hd = o.dk || 0;
+  return '<div class="card" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm' + (hd && m > hd ? ' late' : '') + '">' + m + (hd ? ' / ' + hd : '') + ' dk</div></div>' +
+    (o.not ? '<div class="nt">' + esc(o.not) + '</div>' : '') +
+    '<div class="lk"><button class="qr" data-a="qr">QR · düzenle</button><button class="cn" data-a="iptal">İptal</button></div>' +
     '<div class="act"><button class="b-ready" data-a="hazir">Hazır ✓</button></div></div>';
 }
 function cardReady(o){
@@ -370,12 +395,17 @@ async function act(a, no){
     const r = await post({ a, no });
     if (!r.ok) throw 0;
     if (a === 'hazir') toast('hop! #' + no + ' çağrıldı');
+    if (a === 'iptal') toast('#' + no + ' iptal edildi');
   } catch (_) { Object.assign(o, prev); render(); toast('İşlem yapılamadı, tekrar deneyin'); }
 }
 document.querySelector('.cols').onclick = e => {
   const b = e.target.closest('button[data-a]'); if (!b) return;
   const no = Number(b.closest('.card').dataset.no);
   if (b.dataset.a === 'qr') return showQr(no);
+  if (b.dataset.a === 'iptal'){
+    if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = 'Emin misiniz?'; setTimeout(() => { b.classList.remove('sure'); b.textContent = 'İptal'; }, 3000); return; }
+    return act('iptal', no);
+  }
   act(b.dataset.a, no);
 };
 $('nNew').onclick = async () => {
@@ -385,7 +415,8 @@ $('nNew').onclick = async () => {
   try {
     const o = await post({ a: 'yeni' });
     if (!o.ok) throw 0;
-    L.push({ no: o.no, d: 'hazirlaniyor', c: Date.now(), h: 0 }); render(); showQr(o.no);
+    if (o.dk) DEF_DK = o.dk;
+    L.push({ no: o.no, d: 'hazirlaniyor', c: Date.now(), h: 0, dk: DEF_DK, not: '' }); render(); showQr(o.no);
   } catch (_) { closeQr(); toast('Sipariş oluşturulamadı, tekrar deneyin'); }
   b.disabled = false; b.style.filter = '';
 };
@@ -396,23 +427,45 @@ function openWait(){
   $('qNo').innerHTML = '<span class="ld"><i></i><i></i><i></i></span>';
   $('qBox').innerHTML = '<div class="qsk"></div>';
   $('qHint').textContent = 'Sipariş numarası alınıyor…';
+  qNoCur = 0; $('qFx').style.display = 'none'; $('qCancel').style.display = 'none';
   const bar = $('qBar'); bar.style.animation = 'none'; bar.parentNode.style.opacity = 0;
   $('qOv').classList.add('on');
 }
 
 /* QR */
+const DK = [5, 10, 15, 20, 30]; let DEF_DK = 10, qNoCur = 0, qSel = 10;
+function drawDk(){ $('qDk').innerHTML = DK.map(d => '<button data-d="' + d + '" class="' + (d === qSel ? 'on' : '') + '">' + d + '</button>').join(''); }
+$('qDk').onclick = e => { const b = e.target.closest('button'); if (!b) return; qSel = Number(b.dataset.d); drawDk(); };
 function showQr(no){
+  qNoCur = no;
+  const o = L.find(x => x.no === no) || {};
+  qSel = o.dk || DEF_DK; drawDk(); $('qNot').value = o.not || ''; $('qFx').style.display = '';
+  $('qCancel').style.display = ''; $('qCancel').classList.remove('sure'); $('qCancel').textContent = 'İptal et';
   $('qNo').textContent = no;
   $('qHint').textContent = 'Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.';
   const g = qrcode(0, 'M'); g.addData(custUrl(no)); g.make();
   $('qBox').innerHTML = g.createSvgTag({ cellSize: 8, margin: 1, scalable: true });
   const bar = $('qBar'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = 'cd 25s linear forwards'; bar.parentNode.style.opacity = 1;
   $('qOv').classList.add('on');
-  clearTimeout(qT); qT = setTimeout(closeQr, 25000);
 }
-function closeQr(){ $('qOv').classList.remove('on'); clearTimeout(qT); }
-$('qClose').onclick = closeQr;
-$('qOv').onclick = e => { if (e.target.id === 'qOv') closeQr(); };
+function closeQr(){ $('qOv').classList.remove('on'); clearTimeout(qT); qNoCur = 0; }
+async function saveQr(){
+  const no = qNoCur; if (!no) return closeQr();
+  const o = L.find(x => x.no === no); const not = $('qNot').value.trim();
+  closeQr();
+  if (!o || (o.dk === qSel && (o.not || '') === not)) return;
+  const prev = { dk: o.dk, not: o.not }; o.dk = qSel; o.not = not; render();
+  try { const r = await post({ a: 'detay', no, dk: qSel, not }); if (!r.ok) throw 0; }
+  catch (_) { Object.assign(o, prev); render(); toast('Kaydedilemedi, tekrar deneyin'); }
+}
+$('qClose').onclick = saveQr;
+$('qOv').onclick = e => { if (e.target.id === 'qOv' && qNoCur) saveQr(); };
+$('qNot').onkeydown = e => { if (e.key === 'Enter') saveQr(); };
+$('qCancel').onclick = () => {
+  const b = $('qCancel'), no = qNoCur; if (!no) return;
+  if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = 'Emin misiniz?'; setTimeout(() => { b.classList.remove('sure'); b.textContent = 'İptal et'; }, 3000); return; }
+  closeQr(); act('iptal', no);
+};
 
 /* Ayarlar */
 $('gear').onclick = () => { $('tvUrl').value = tvUrl(); $('nPin').value = ''; $('sErr').textContent = ''; $('sOv').classList.add('on'); };
