@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
 <title>hop! · Kafe Ekranı</title>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="hop! Kafe">
+<script>
+  // iOS'ta manifest yerine mevcut adres (bağlantı dahil) ana ekrana eklenir
+  if (!/iPad|iPhone|iPod/.test(navigator.userAgent) && !(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+    document.write('<link rel="manifest" href="kafe.webmanifest">');
+  }
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -134,6 +146,14 @@ header .hop{font-size:24px}
 .set .line{display:flex;gap:8px}
 .set .line .inp{flex:1;width:auto;padding:13px}
 .set .line .btn{padding:13px 18px}
+.inst{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:min(calc(100% - 32px),560px);background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px 18px;display:none;align-items:center;gap:14px;box-shadow:0 20px 50px -20px rgba(0,0,0,.8);z-index:15;animation:up .4s cubic-bezier(.2,.9,.3,1.2)}
+.inst.on{display:flex}
+.inst img{width:52px;height:52px;border-radius:14px;flex:none}
+.inst .tx{flex:1;font-size:14px;line-height:1.45;color:var(--mut)}
+.inst .tx b{display:block;color:var(--tx);font-size:15.5px;margin-bottom:2px}
+.inst .tx em{font-style:normal;color:var(--tx);font-weight:600}
+.inst .go{padding:12px 18px;font-size:15px;flex:none}
+.inst .x{width:34px;height:34px;border-radius:10px;color:var(--mut);font-size:20px;flex:none}
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--tx);color:#111;padding:12px 20px;border-radius:12px;font-weight:600;font-size:14px;opacity:0;transition:.25s;z-index:20;pointer-events:none}
 .toast.on{opacity:1;transform:translateX(-50%)}
 
@@ -228,6 +248,13 @@ header .hop{font-size:24px}
 </div>
 
 <div class="toast" id="toast"></div>
+
+<div class="inst" id="inst">
+  <img src="icon-192.png" alt="">
+  <div class="tx" id="instTx"><b>hop!'ı uygulama olarak yükleyin</b>Ana ekrandan tek dokunuşla, tam ekran açılır.</div>
+  <button class="btn pri go" id="instGo">Yükle</button>
+  <button class="x" id="instX" aria-label="Kapat">×</button>
+</div>
 
 <script src="qr.js"></script>
 <script>
@@ -481,12 +508,39 @@ $('pSave').onclick = async () => {
 $('logout').onclick = () => { LS.del('pin'); PIN = null; $('sOv').classList.remove('on'); start(); };
 $('unlink').onclick = () => { LS.del('pin'); LS.del('sid'); SID = null; PIN = null; $('sOv').classList.remove('on'); start(); };
 
+/* Uygulama olarak yükle */
+const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const STANDALONE = matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+let instEvt = null;
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+addEventListener('beforeinstallprompt', e => { e.preventDefault(); instEvt = e; maybeInstall(); });
+addEventListener('appinstalled', () => { $('inst').classList.remove('on'); LS.set('instOk', '1'); });
+function maybeInstall(){
+  if (STANDALONE || LS.get('instOk') || !$('main').classList.contains('on')) return;
+  if (IOS){
+    $('instTx').innerHTML = "<b>hop!'ı ana ekrana ekleyin</b>Safari'de alttaki <em>Paylaş</em> ⬆︎ simgesine, sonra <em>Ana Ekrana Ekle</em>'ye dokunun.";
+    $('instGo').style.display = 'none';
+  } else if (!instEvt) return;
+  $('inst').classList.add('on');
+}
+$('instGo').onclick = async () => {
+  if (!instEvt) return;
+  instEvt.prompt();
+  const r = await instEvt.userChoice.catch(() => ({}));
+  instEvt = null; $('inst').classList.remove('on');
+  if (r && r.outcome === 'accepted') LS.set('instOk', '1');
+};
+$('instX').onclick = () => { $('inst').classList.remove('on'); LS.set('instOk', '1'); };
+
 /* Saat */
 setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 1000);
 setInterval(() => { if ($('main').classList.contains('on')) render(); }, 30000);
 
 /* ---------- Başlangıç ---------- */
-function openMain(){ $('mAd').textContent = AD || 'Kafem'; show('main'); refresh(); }
+function openMain(){ $('mAd').textContent = AD || 'Kafem'; show('main'); refresh();
+  if (IOS && SID && !DEMO && !q.get('s')) try { history.replaceState(null, '', 'kafe.html?s=' + encodeURIComponent(SID)); } catch (_) {}
+  setTimeout(maybeInstall, 1500);
+}
 async function start(o){
   clearTimeout(pollT);
   if (!SID && !DEMO) return show('setup');
