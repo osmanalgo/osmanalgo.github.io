@@ -4,7 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
-<title>hop! · Kafe Ekranı</title>
+<title data-i18n="k.title">hop! · Kafe Ekranı</title>
+<script src="i18n.js"></script>
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -18,7 +19,7 @@
   }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0c10; --card:#12151b; --card2:#171b22; --line:#1f242d; --tx:#f2f4f7; --mut:#8a93a3;
@@ -172,22 +173,44 @@ header .hop{font-size:24px}
 html,body{overscroll-behavior:none;overscroll-behavior-y:none;touch-action:manipulation;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
 input,textarea{font-size:16px!important;user-select:text;-webkit-user-select:text}
 img,svg{-webkit-user-drag:none;user-select:none}
+
+/* dil / RTL */
+[lang=ar] body{font-family:'IBM Plex Sans Arabic',Inter,system-ui,sans-serif}
+[lang=ar]{--hd:'Space Grotesk','IBM Plex Sans Arabic',system-ui,sans-serif}
+[lang=ar] .inp{font-family:'IBM Plex Sans Arabic',Inter,sans-serif}
+[dir=rtl] *{letter-spacing:0!important}
+.hop{direction:ltr}
+.lng{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:3px;gap:2px;flex:none}
+.lng button{color:var(--mut);font:600 12.5px Inter,'IBM Plex Sans Arabic',sans-serif;padding:7px 10px;border-radius:99px;min-width:34px}
+.lng button.on{background:var(--tx);color:#111}
+.lng.lfix{position:absolute;top:calc(16px + env(safe-area-inset-top));inset-inline-end:16px}
+.center{position:relative}
+.set .lrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pad,#url,#tvUrl,#nPin{direction:ltr}
+#url,#tvUrl{text-align:left}
+[dir=rtl] header .t{padding-left:0!important;border-left:0!important;padding-right:14px;border-right:1px solid var(--line)}
+[dir=rtl] .col+.col{border-left:0;border-right:1px solid var(--line)}
+[dir=rtl] .fx,[dir=rtl] .set{text-align:right}
+[dir=rtl] .bar i{transform-origin:right}
+@media (max-width:760px){ header .lng{display:none} [dir=rtl] .col+.col{border-right:0} }
 </style>
 </head>
 <body>
 
 <!-- 1. Bağlantı kurulumu (ilk sefer) -->
 <section class="scr center" id="setup">
+  <div class="lng lfix" data-lng></div>
   <div class="bighop"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
-  <h2>Kafe ekranını bağlayın</h2>
-  <p class="hint">Google Sheet'te yayınladığınız web uygulaması bağlantısını yapıştırın. Bu cihaz bağlantıyı hatırlar, bir daha sorulmaz.</p>
+  <h2 data-i18n="k.setupH">Kafe ekranını bağlayın</h2>
+  <p class="hint" data-i18n="k.setupHint">Google Sheet'te yayınladığınız web uygulaması bağlantısını yapıştırın. Bu cihaz bağlantıyı hatırlar, bir daha sorulmaz.</p>
   <input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="url" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off" spellcheck="false">
   <div class="err" id="uErr"></div>
-  <button class="btn pri" id="uGo">Bağlan</button>
+  <button class="btn pri" id="uGo" data-i18n="k.connect">Bağlan</button>
 </section>
 
 <!-- 2. PIN -->
 <section class="scr center" id="pin">
+  <div class="lng lfix" data-lng></div>
   <div class="bighop" style="margin-bottom:-4px"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span></div>
   <div class="brand" id="pAd">…</div>
   <h2 id="pT">PIN girin</h2>
@@ -201,54 +224,67 @@ img,svg{-webkit-user-drag:none;user-select:none}
 <section class="scr" id="main">
   <header>
     <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
-    <div class="t" style="padding-left:14px;border-left:1px solid var(--line)"><b id="mAd">Kafem</b><small><i class="lv" id="lv"></i><span id="lvT">Canlı</span></small></div>
+    <div class="t" style="padding-left:14px;border-left:1px solid var(--line)"><b id="mAd">Kafem</b><small><i class="lv" id="lv"></i><span id="lvT" data-i18n="k.live">Canlı</span></small></div>
     <div class="clock" id="clock">--:--</div>
-    <button class="ico" id="gear" aria-label="Ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
-    <button class="btn pri new" id="nNew"><span>+</span> <b>Yeni sipariş</b></button>
+    <div class="lng" data-lng></div>
+    <button class="ico" id="gear" data-i18n-aria="k.settings" aria-label="Ayarlar"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="btn pri new" id="nNew"><span>+</span> <b data-i18n="k.newOrder">Yeni sipariş</b></button>
   </header>
   <div class="cols">
-    <div class="col c1"><div class="ch"><h3>Hazırlanıyor</h3><span class="n" id="n1">0</span></div><div class="list" id="l1"></div></div>
-    <div class="col c2"><div class="ch"><h3>Hazır · çağrılıyor</h3><span class="n" id="n2">0</span></div><div class="list" id="l2"></div></div>
+    <div class="col c1"><div class="ch"><h3 data-i18n="k.colPrep">Hazırlanıyor</h3><span class="n" id="n1">0</span></div><div class="list" id="l1"></div></div>
+    <div class="col c2"><div class="ch"><h3 data-i18n="k.colReady">Hazır · çağrılıyor</h3><span class="n" id="n2">0</span></div><div class="list" id="l2"></div></div>
   </div>
-  <footer><span id="fStat">Bugün 0 sipariş teslim edildi</span><a href="https://osmanalgo.github.io/hop/kurulum/" target="_blank" rel="noopener" style="color:inherit;text-decoration:none">hop! · osman.algo</a></footer>
+  <footer><span id="fStat">Bugün 0 sipariş teslim edildi</span><span dir="ltr">hop! · osman.algo</span></footer>
 </section>
 
 <!-- QR modal -->
 <div class="ov" id="qOv">
   <div class="mod">
-    <div class="lbl">Sipariş numarası</div>
+    <div class="lbl" data-i18n="k.orderNo">Sipariş numarası</div>
     <div class="big" id="qNo">–</div>
     <div class="qrbox" id="qBox"></div>
     <p class="hint" id="qHint">Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.</p>
     <div class="bar" style="display:none"><i id="qBar"></i></div>
     <div class="fx" id="qFx">
-      <label>Hazırlama süresi</label>
+      <label data-i18n="k.prepTime">Hazırlama süresi</label>
       <div class="chips" id="qDk"></div>
-      <input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="qNot" maxlength="140" placeholder="Not (isteğe bağlı): 2 latte, masa 5…" autocomplete="off">
+      <input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="qNot" maxlength="140" data-i18n-ph="k.notePh" placeholder="Not (isteğe bağlı): 2 latte, masa 5…" autocomplete="off">
     </div>
     <div class="row">
       <button class="btn gh cx" id="qCancel">İptal et</button>
-      <button class="btn pri" id="qClose">Tamam</button>
+      <button class="btn pri" id="qClose" data-i18n="k.ok">Tamam</button>
     </div>
   </div>
 </div>
 
 <!-- Ayarlar modal -->
+<div class="ov" id="tOv">
+  <div class="mod">
+    <div class="lbl" data-i18n="k.setupDone">Kurulum tamam ✓</div>
+    <h2 style="font-size:30px" data-i18n="k.transferH">Tablete aktar</h2>
+    <div class="qrbox" id="tBox"></div>
+    <p class="hint" data-i18n="k.transferHint">Kasadaki tabletin kamerasıyla bu karekodu okutun. Kafe ekranı bağlı olarak açılır, sadece PIN'i girin.</p>
+    <button class="btn pri" id="tClose" style="width:100%" data-i18n="k.continueHere">Bu cihazda devam et</button>
+  </div>
+</div>
+
 <div class="ov" id="sOv">
   <div class="mod">
-    <h2 style="font-size:24px">Ayarlar</h2>
+    <h2 style="font-size:24px" data-i18n="k.settings">Ayarlar</h2>
+    <button class="btn gh" id="tOpen" style="width:100%" data-i18n="k.transferBtn">📲 Tablete / başka cihaza aktar</button>
     <div class="set">
-      <label>TV / bekleme ekranı bağlantısı</label>
-      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="tvUrl" readonly><button class="btn gh" id="tvCopy">Kopyala</button></div>
-      <label>PIN değiştir (4–12 rakam)</label>
-      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="nPin" inputmode="numeric" maxlength="12" placeholder="Yeni PIN"><button class="btn gh" id="pSave">Kaydet</button></div>
+      <div class="lrow"><label data-i18n="k.lang">Dil</label><div class="lng" data-lng></div></div>
+      <label data-i18n="k.tvLink">TV / bekleme ekranı bağlantısı</label>
+      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="tvUrl" readonly><button class="btn gh" id="tvCopy" data-i18n="k.copy">Kopyala</button></div>
+      <label data-i18n="k.pinChange">PIN değiştir (4–12 rakam)</label>
+      <div class="line"><input autocorrect="off" autocapitalize="off" spellcheck="false" class="inp" id="nPin" inputmode="numeric" maxlength="12" data-i18n-ph="k.newPin" placeholder="Yeni PIN"><button class="btn gh" id="pSave" data-i18n="k.save">Kaydet</button></div>
       <div class="err" id="sErr"></div>
     </div>
     <div class="row">
-      <button class="btn gh" id="logout">Çıkış yap</button>
-      <button class="btn gh" id="unlink">Bağlantıyı değiştir</button>
+      <button class="btn gh" id="logout" data-i18n="k.logout">Çıkış yap</button>
+      <button class="btn gh" id="unlink" data-i18n="k.unlink">Bağlantıyı değiştir</button>
     </div>
-    <button class="btn pri" id="sClose" style="width:100%">Tamam</button>
+    <button class="btn pri" id="sClose" style="width:100%" data-i18n="k.ok">Tamam</button>
   </div>
 </div>
 
@@ -256,9 +292,9 @@ img,svg{-webkit-user-drag:none;user-select:none}
 
 <div class="inst" id="inst">
   <img src="icon-192.png" alt="">
-  <div class="tx" id="instTx"><b>hop!'ı uygulama olarak yükleyin</b>Ana ekrandan tek dokunuşla, tam ekran açılır.</div>
-  <button class="btn pri go" id="instGo">Yükle</button>
-  <button class="x" id="instX" aria-label="Kapat">×</button>
+  <div class="tx" id="instTx"></div>
+  <button class="btn pri go" id="instGo" data-i18n="k.install">Yükle</button>
+  <button class="x" id="instX" data-i18n-aria="k.close" aria-label="Kapat">×</button>
 </div>
 
 <script src="qr.js"></script>
@@ -274,7 +310,7 @@ let SID = q.get('s') || LS.get('sid'), PIN = LS.get('pin'), AD = '', L = [], pol
 
 const API = () => 'https://script.google.com/macros/s/' + SID + '/exec';
 const custUrl = no => new URL('musteri.html?s=' + encodeURIComponent(SID || 'demo') + '&n=' + no + (DEMO ? '&demo=1' : ''), location.href).href;
-const tvUrl = () => new URL('tv.html?s=' + encodeURIComponent(SID || 'demo') + (DEMO ? '&demo=1' : ''), location.href).href;
+const tvUrl = () => new URL('tv.html?s=' + encodeURIComponent(SID || 'demo') + (DEMO ? '&demo=1' : '') + '&lang=' + I18N.lang, location.href).href;
 
 function show(id){ document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); }
 function toast(t){ const e = $('toast'); e.textContent = t; e.classList.add('on'); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove('on'), 2200); }
@@ -286,15 +322,15 @@ const D = (() => {
     { no: 21, d: 'teslim', c: n - 30*m, h: n - 20*m },
     { no: 22, d: 'teslim', c: n - 22*m, h: n - 14*m },
     { no: 23, d: 'hazir', c: n - 12*m, h: n - 1*m },
-    { no: 24, d: 'hazirlaniyor', c: n - 12*m, h: 0, dk: 10, not: '2 latte, 1 tost' },
-    { no: 25, d: 'hazirlaniyor', c: n - 5*m, h: 0, dk: 15, not: 'Masa 5 · acısız' },
+    { no: 24, d: 'hazirlaniyor', c: n - 12*m, h: 0, dk: 10, not: t('k.demoN1') },
+    { no: 25, d: 'hazirlaniyor', c: n - 5*m, h: 0, dk: 15, not: t('k.demoN2') },
     { no: 26, d: 'hazirlaniyor', c: n - 2*m, h: 0, dk: 5, not: '' }
   ]};
 })();
 function demo(b){
   const o = D.L.find(x => x.no === Number(b.no));
   switch (b.a){
-    case 'giris': case 'pinAyarla': return { ok: true, ad: 'Kafem' };
+    case 'giris': case 'pinAyarla': return { ok: true, ad: t('c.demoName') };
     case 'liste': return { ok: true, l: D.L.map(x => ({ ...x })) };
     case 'yeni': { const no = Math.max(...D.L.map(x => x.no)) + 1; D.L.push({ no, d: 'hazirlaniyor', c: Date.now(), h: 0, dk: 10, not: '' }); return { ok: true, no }; }
     case 'hazir': o.d = 'hazir'; o.h = Date.now(); return { ok: true };
@@ -313,7 +349,7 @@ async function post(b){
   return r.json();
 }
 async function info(){
-  if (DEMO) return { ok: true, ad: 'Kafem', pinVar: true };
+  if (DEMO) return { ok: true, ad: t('c.demoName'), pinVar: true };
   const r = await fetch(API() + '?_=' + Date.now());
   return r.json();
 }
@@ -328,16 +364,16 @@ function parseSid(v){
 $('uGo').onclick = async () => {
   const s = parseSid($('url').value);
   $('uErr').textContent = '';
-  if (!s) return $('uErr').textContent = 'Bağlantı tanınmadı. "/exec" ile biten adresi yapıştırın.';
-  SID = s; $('uGo').textContent = 'Kontrol ediliyor…';
+  if (!s) return $('uErr').textContent = t('k.badUrl');
+  SID = s; $('uGo').textContent = t('k.checking');
   try {
     const o = await info();
     if (!o.ok) throw 0;
     LS.set('sid', SID); start(o);
   } catch (_) {
-    $('uErr').textContent = 'Bağlanılamadı. Dağıtımda erişimin "Herkes" olduğundan emin olun.';
+    $('uErr').textContent = t('k.connFail');
   }
-  $('uGo').textContent = 'Bağlan';
+  $('uGo').textContent = t('k.connect');
 };
 
 /* ---------- 2. PIN ---------- */
@@ -348,7 +384,7 @@ function drawDots(){
 }
 function buildPad(){
   const k = ['1','2','3','4','5','6','7','8','9','sil','0','tamam'];
-  $('pad').innerHTML = k.map(x => '<button data-k="' + x + '" class="' + (x.length > 1 ? 'k' : '') + '">' + (x === 'sil' ? '⌫' : x === 'tamam' ? 'Tamam' : x) + '</button>').join('');
+  $('pad').innerHTML = k.map(x => '<button data-k="' + x + '" class="' + (x.length > 1 ? 'k' : '') + '">' + (x === 'sil' ? '⌫' : x === 'tamam' ? t('k.ok') : x) + '</button>').join('');
   $('pad').onclick = e => {
     const b = e.target.closest('button'); if (!b) return;
     const x = b.dataset.k; $('pErr').textContent = '';
@@ -360,25 +396,28 @@ function buildPad(){
 }
 function pinFail(t){ $('pErr').textContent = t; entry = ''; drawDots(); $('dots').classList.remove('shake'); void $('dots').offsetWidth; $('dots').classList.add('shake'); }
 async function submitPin(){
-  if (entry.length < 4) return pinFail('En az 4 rakam');
+  if (entry.length < 4) return pinFail(t('k.min4'));
   if (setMode){
-    if (!first){ first = entry; entry = ''; drawDots(); $('pT').textContent = 'PIN tekrar'; $('pH').textContent = 'Aynı PIN\'i bir kez daha girin.'; return; }
-    if (first !== entry){ first = ''; $('pT').textContent = 'PIN belirleyin'; return pinFail('PIN\'ler eşleşmedi'); }
+    if (!first){ first = entry; entry = ''; drawDots(); pinTx(); return; }
+    if (first !== entry){ first = ''; pinTx(); return pinFail(t('k.pinMismatch')); }
     const o = await post({ a: 'pinAyarla', yeni: entry });
-    if (!o.ok) return pinFail('Kaydedilemedi');
+    if (!o.ok) return pinFail(t('k.saveFail'));
     PIN = entry;
   } else {
     PIN = entry;
     const o = await post({ a: 'giris' }).catch(() => ({ ok: false, hata: 'ag' }));
-    if (!o.ok) return pinFail(o.hata === 'ag' ? 'Bağlantı hatası' : 'PIN yanlış');
+    if (!o.ok) return pinFail(t(o.hata === 'ag' ? 'k.netErr' : 'k.pinWrong'));
   }
-  LS.set('pin', PIN); entry = ''; openMain();
+  LS.set('pin', PIN); entry = ''; const firstSet = setMode; openMain(); if (firstSet) setTimeout(showTransfer, 400);
+}
+function pinTx(){
+  $('pT').textContent = t(!setMode ? 'k.pinEnter' : first ? 'k.pinAgain' : 'k.pinSet');
+  $('pH').textContent = t(!setMode ? 'k.pinHint' : first ? 'k.pinAgainHint' : 'k.pinSetHint');
 }
 function askPin(o){
   $('pAd').textContent = o.ad || '';
   setMode = !o.pinVar; first = ''; entry = '';
-  $('pT').textContent = setMode ? 'PIN belirleyin' : 'PIN girin';
-  $('pH').textContent = setMode ? 'Kafe ekranını korumak için 4–12 haneli bir PIN seçin.' : 'Kafe ekranı PIN ile korunur.';
+  pinTx();
   buildPad(); drawDots(); show('pin');
 }
 
@@ -387,24 +426,24 @@ const mins = t => Math.max(0, Math.floor((Date.now() - t) / 60000));
 const esc = s => String(s || '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 function cardPrep(o){
   const m = mins(o.c), hd = o.dk || 0;
-  return '<div class="card" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm' + (hd && m > hd ? ' late' : '') + '">' + m + (hd ? ' / ' + hd : '') + ' dk</div></div>' +
+  return '<div class="card" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm' + (hd && m > hd ? ' late' : '') + '">' + m + (hd ? ' / ' + hd : '') + ' ' + t('c.min') + '</div></div>' +
     (o.not ? '<div class="nt">' + esc(o.not) + '</div>' : '') +
-    '<div class="lk"><button class="qr" data-a="qr">QR · düzenle</button><button class="cn" data-a="iptal">İptal</button></div>' +
-    '<div class="act"><button class="b-ready" data-a="hazir">Hazır ✓</button></div></div>';
+    '<div class="lk"><button class="qr" data-a="qr">' + t('k.qrEdit') + '</button><button class="cn" data-a="iptal">' + t('k.cancel') + '</button></div>' +
+    '<div class="act"><button class="b-ready" data-a="hazir">' + t('k.readyBtn') + '</button></div></div>';
 }
 function cardReady(o){
-  return '<div class="card r" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm">' + mins(o.h) + ' dk</div></div>' +
-    '<span class="ring"><i></i>Müşteri çağrılıyor</span>' +
-    '<div class="act"><button class="b-back" data-a="geri">Geri al</button><button class="b-done" data-a="teslim">Teslim edildi</button></div></div>';
+  return '<div class="card r" data-no="' + o.no + '"><div class="top"><div class="no">' + o.no + '</div><div class="tm">' + mins(o.h) + ' ' + t('c.min') + '</div></div>' +
+    '<span class="ring"><i></i>' + t('k.calling') + '</span>' +
+    '<div class="act"><button class="b-back" data-a="geri">' + t('k.undo') + '</button><button class="b-done" data-a="teslim">' + t('k.delivered') + '</button></div></div>';
 }
 function render(){
   const p = L.filter(x => x.d === 'hazirlaniyor').sort((a, b) => a.c - b.c);
   const r = L.filter(x => x.d === 'hazir').sort((a, b) => a.h - b.h);
-  const t = L.filter(x => x.d === 'teslim').length;
+  const tes = L.filter(x => x.d === 'teslim').length;
   $('n1').textContent = p.length; $('n2').textContent = r.length;
-  $('l1').innerHTML = p.length ? p.map(cardPrep).join('') : '<div class="empty">Bekleyen sipariş yok.<br>"Yeni sipariş" ile başlayın.</div>';
-  $('l2').innerHTML = r.length ? r.map(cardReady).join('') : '<div class="empty">Hazır sipariş yok.</div>';
-  $('fStat').textContent = 'Bugün ' + t + ' sipariş teslim edildi';
+  $('l1').innerHTML = p.length ? p.map(cardPrep).join('') : '<div class="empty">' + t('k.empty1') + '</div>';
+  $('l2').innerHTML = r.length ? r.map(cardReady).join('') : '<div class="empty">' + t('k.empty2') + '</div>';
+  $('fStat').textContent = t('k.stat', { n: tes });
 }
 async function refresh(){
   clearTimeout(pollT);
@@ -412,9 +451,9 @@ async function refresh(){
     const o = await post({ a: 'liste' });
     if (!o.ok && o.hata === 'pinYanlis'){ LS.del('pin'); PIN = null; return start(); }
     if (o.ok){ L = o.l; render(); }
-    $('lv').classList.remove('off'); $('lvT').textContent = 'Canlı';
+    $('lv').classList.remove('off'); $('lvT').textContent = t('k.live');
   } catch (_) {
-    $('lv').classList.add('off'); $('lvT').textContent = 'Bağlantı yok, tekrar deneniyor';
+    $('lv').classList.add('off'); $('lvT').textContent = t('k.noConn');
   }
   pollT = setTimeout(refresh, 6000);
 }
@@ -426,16 +465,16 @@ async function act(a, no){
   try {
     const r = await post({ a, no });
     if (!r.ok) throw 0;
-    if (a === 'hazir') toast('hop! #' + no + ' çağrıldı');
-    if (a === 'iptal') toast('#' + no + ' iptal edildi');
-  } catch (_) { Object.assign(o, prev); render(); toast('İşlem yapılamadı, tekrar deneyin'); }
+    if (a === 'hazir') toast(t('k.called', { n: no }));
+    if (a === 'iptal') toast(t('k.cancelled', { n: no }));
+  } catch (_) { Object.assign(o, prev); render(); toast(t('k.actFail')); }
 }
 document.querySelector('.cols').onclick = e => {
   const b = e.target.closest('button[data-a]'); if (!b) return;
   const no = Number(b.closest('.card').dataset.no);
   if (b.dataset.a === 'qr') return showQr(no);
   if (b.dataset.a === 'iptal'){
-    if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = 'Emin misiniz?'; setTimeout(() => { b.classList.remove('sure'); b.textContent = 'İptal'; }, 3000); return; }
+    if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = t('k.sure'); setTimeout(() => { b.classList.remove('sure'); b.textContent = t('k.cancel'); }, 3000); return; }
     return act('iptal', no);
   }
   act(b.dataset.a, no);
@@ -449,7 +488,7 @@ $('nNew').onclick = async () => {
     if (!o.ok) throw 0;
     if (o.dk) DEF_DK = o.dk;
     L.push({ no: o.no, d: 'hazirlaniyor', c: Date.now(), h: 0, dk: DEF_DK, not: '' }); render(); showQr(o.no);
-  } catch (_) { closeQr(); toast('Sipariş oluşturulamadı, tekrar deneyin'); }
+  } catch (_) { closeQr(); toast(t('k.newFail')); }
   b.disabled = false; b.style.filter = '';
 };
 
@@ -458,7 +497,7 @@ function openWait(){
   clearTimeout(qT);
   $('qNo').innerHTML = '<span class="ld"><i></i><i></i><i></i></span>';
   $('qBox').innerHTML = '<div class="qsk"></div>';
-  $('qHint').textContent = 'Sipariş numarası alınıyor…';
+  $('qHint').textContent = t('k.gettingNo');
   qNoCur = 0; $('qFx').style.display = 'none'; $('qCancel').style.display = 'none';
   const bar = $('qBar'); bar.style.animation = 'none'; bar.parentNode.style.opacity = 0;
   $('qOv').classList.add('on');
@@ -472,9 +511,9 @@ function showQr(no){
   qNoCur = no;
   const o = L.find(x => x.no === no) || {};
   qSel = o.dk || DEF_DK; drawDk(); $('qNot').value = o.not || ''; $('qFx').style.display = '';
-  $('qCancel').style.display = ''; $('qCancel').classList.remove('sure'); $('qCancel').textContent = 'İptal et';
+  $('qCancel').style.display = ''; $('qCancel').classList.remove('sure'); $('qCancel').textContent = t('k.cancelOrder');
   $('qNo').textContent = no;
-  $('qHint').textContent = 'Müşteri telefon kamerasıyla okutsun. Hazır olunca telefonu çalacak.';
+  $('qHint').textContent = t('k.qrHint');
   const g = qrcode(0, 'M'); g.addData(custUrl(no)); g.make();
   $('qBox').innerHTML = g.createSvgTag({ cellSize: 8, margin: 1, scalable: true });
   const bar = $('qBar'); bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = 'cd 25s linear forwards'; bar.parentNode.style.opacity = 1;
@@ -488,27 +527,35 @@ async function saveQr(){
   if (!o || (o.dk === qSel && (o.not || '') === not)) return;
   const prev = { dk: o.dk, not: o.not }; o.dk = qSel; o.not = not; render();
   try { const r = await post({ a: 'detay', no, dk: qSel, not }); if (!r.ok) throw 0; }
-  catch (_) { Object.assign(o, prev); render(); toast('Kaydedilemedi, tekrar deneyin'); }
+  catch (_) { Object.assign(o, prev); render(); toast(t('k.saveRetry')); }
 }
 $('qClose').onclick = saveQr;
 $('qOv').onclick = e => { if (e.target.id === 'qOv' && qNoCur) saveQr(); };
 $('qNot').onkeydown = e => { if (e.key === 'Enter') saveQr(); };
 $('qCancel').onclick = () => {
   const b = $('qCancel'), no = qNoCur; if (!no) return;
-  if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = 'Emin misiniz?'; setTimeout(() => { b.classList.remove('sure'); b.textContent = 'İptal et'; }, 3000); return; }
+  if (!b.classList.contains('sure')){ b.classList.add('sure'); b.textContent = t('k.sure'); setTimeout(() => { b.classList.remove('sure'); b.textContent = t('k.cancelOrder'); }, 3000); return; }
   closeQr(); act('iptal', no);
 };
 
 /* Ayarlar */
+function transferUrl(){ return new URL('kafe.html?s=' + encodeURIComponent(SID || 'demo') + (DEMO ? '&demo=1' : ''), location.href).href; }
+function showTransfer(){
+  const g = qrcode(0, 'M'); g.addData(transferUrl()); g.make();
+  $('tBox').innerHTML = g.createSvgTag({ cellSize: 8, margin: 1, scalable: true });
+  $('sOv').classList.remove('on'); $('tOv').classList.add('on');
+}
+$('tClose').onclick = () => { $('tOv').classList.remove('on'); setTimeout(maybeInstall, 600); };
+$('tOpen').onclick = showTransfer;
 $('gear').onclick = () => { $('tvUrl').value = tvUrl(); $('nPin').value = ''; $('sErr').textContent = ''; $('sOv').classList.add('on'); };
 $('sClose').onclick = () => $('sOv').classList.remove('on');
-$('tvCopy').onclick = async () => { try { await navigator.clipboard.writeText($('tvUrl').value); toast('Kopyalandı'); } catch (_) { $('tvUrl').select(); } };
+$('tvCopy').onclick = async () => { try { await navigator.clipboard.writeText($('tvUrl').value); toast(t('k.copied')); } catch (_) { $('tvUrl').select(); } };
 $('pSave').onclick = async () => {
   const v = $('nPin').value.trim();
-  if (!/^\d{4,12}$/.test(v)) return $('sErr').textContent = 'PIN 4–12 rakam olmalı';
+  if (!/^\d{4,12}$/.test(v)) return $('sErr').textContent = t('k.pinRule');
   const o = await post({ a: 'pinDegistir', yeni: v }).catch(() => ({ ok: false }));
-  if (!o.ok) return $('sErr').textContent = 'Kaydedilemedi';
-  PIN = v; LS.set('pin', v); $('nPin').value = ''; toast('PIN değiştirildi');
+  if (!o.ok) return $('sErr').textContent = t('k.saveFail');
+  PIN = v; LS.set('pin', v); $('nPin').value = ''; toast(t('k.pinChanged'));
 };
 $('logout').onclick = () => { LS.del('pin'); PIN = null; $('sOv').classList.remove('on'); start(); };
 $('unlink').onclick = () => { LS.del('pin'); LS.del('sid'); SID = null; PIN = null; $('sOv').classList.remove('on'); start(); };
@@ -520,10 +567,12 @@ let instEvt = null;
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 addEventListener('beforeinstallprompt', e => { e.preventDefault(); instEvt = e; maybeInstall(); });
 addEventListener('appinstalled', () => { $('inst').classList.remove('on'); LS.set('instOk', '1'); });
+function instTx(){ $('instTx').innerHTML = IOS ? '<b>' + t('k.instIosH') + '</b>' + t('k.instIosT') : '<b>' + t('k.instH') + '</b>' + t('k.instT'); }
+instTx();
 function maybeInstall(){
-  if (STANDALONE || LS.get('instOk') || !$('main').classList.contains('on')) return;
+  if (STANDALONE || LS.get('instOk') || !$('main').classList.contains('on') || $('tOv').classList.contains('on')) return;
   if (IOS){
-    $('instTx').innerHTML = "<b>hop!'ı ana ekrana ekleyin</b>Safari'de alttaki <em>Paylaş</em> ⬆︎ simgesine, sonra <em>Ana Ekrana Ekle</em>'ye dokunun.";
+    instTx();
     $('instGo').style.display = 'none';
   } else if (!instEvt) return;
   $('inst').classList.add('on');
@@ -538,11 +587,11 @@ $('instGo').onclick = async () => {
 $('instX').onclick = () => { $('inst').classList.remove('on'); LS.set('instOk', '1'); };
 
 /* Saat */
-setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 1000);
+setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }, 1000);
 setInterval(() => { if ($('main').classList.contains('on')) render(); }, 30000);
 
 /* ---------- Başlangıç ---------- */
-function openMain(){ $('mAd').textContent = AD || 'Kafem'; show('main'); refresh();
+function openMain(){ $('mAd').textContent = AD || t('c.demoName'); show('main'); refresh();
   if (IOS && SID && !DEMO && !q.get('s')) try { history.replaceState(null, '', 'kafe.html?s=' + encodeURIComponent(SID)); } catch (_) {}
   setTimeout(maybeInstall, 1500);
 }
@@ -558,6 +607,15 @@ async function start(o){
   openMain();
 }
 if (DEMO){ PIN = '0000'; }
+window.onLang = () => {
+  instTx();
+  D.L.forEach(x => { if (x.no === 24) x.not = t('k.demoN1'); if (x.no === 25) x.not = t('k.demoN2'); });
+  if ($('pin').classList.contains('on')){ pinTx(); buildPad(); }
+  if ($('main').classList.contains('on')){ render(); $('lvT').textContent = t($('lv').classList.contains('off') ? 'k.noConn' : 'k.live'); }
+  if ($('qOv').classList.contains('on')){ $('qHint').textContent = t(qNoCur ? 'k.qrHint' : 'k.gettingNo'); $('qCancel').classList.remove('sure'); $('qCancel').textContent = t('k.cancelOrder'); }
+  if ($('sOv').classList.contains('on')) $('tvUrl').value = tvUrl();
+  $('uGo').textContent = t('k.connect');
+};
 start();
 </script>
 <script>

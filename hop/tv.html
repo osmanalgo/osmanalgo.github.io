@@ -4,9 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#0a0c10">
-<title>hop! · Sipariş Ekranı</title>
+<title data-i18n="v.title">hop! · Sipariş Ekranı</title>
+<script src="i18n.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   --bg:#0a0c10; --card:#12151b; --line:#1f242d; --tx:#f2f4f7; --mut:#8a93a3;
@@ -87,6 +88,16 @@ footer b{color:var(--tx);font-weight:600}
 html,body{overscroll-behavior:none;overscroll-behavior-y:none;touch-action:manipulation;-webkit-touch-callout:none;-webkit-text-size-adjust:100%}
 input,textarea{font-size:16px!important;user-select:text;-webkit-user-select:text}
 img,svg{-webkit-user-drag:none;user-select:none}
+
+/* dil / RTL */
+[lang=ar] body{font-family:'IBM Plex Sans Arabic',Inter,system-ui,sans-serif}
+[lang=ar]{--hd:'Space Grotesk','IBM Plex Sans Arabic',system-ui,sans-serif}
+[dir=rtl] *{letter-spacing:0!important}
+.hop{direction:ltr}
+[dir=rtl] header .ad{padding-left:0;border-left:0;padding-right:2.2vw;border-right:1px solid var(--line)}
+[dir=rtl] .col+.col{border-left:0;border-right:1px solid var(--line)}
+@media (orientation:portrait){[dir=rtl] .col+.col{border-right:0}}
+#start button{font-family:Inter,'IBM Plex Sans Arabic',sans-serif}
 </style>
 </head>
 <body>
@@ -100,12 +111,12 @@ img,svg{-webkit-user-drag:none;user-select:none}
 </header>
 
 <main>
-  <section class="col c1"><h3><span class="dot"></span>Hazırlanıyor</h3><div class="grid" id="g1"></div></section>
-  <section class="col c2"><h3><span class="dot"></span>Hazır · gelin alın</h3><div class="grid" id="g2"></div></section>
+  <section class="col c1"><h3><span class="dot"></span><span data-i18n="v.prep">Hazırlanıyor</span></h3><div class="grid" id="g1"></div></section>
+  <section class="col c2"><h3><span class="dot"></span><span data-i18n="v.ready">Hazır · gelin alın</span></h3><div class="grid" id="g2"></div></section>
 </main>
 
 <footer>
-  <span>Numaranız hazır olunca burada ve <b>telefonunuzda</b> görünür</span>
+  <span data-i18n-html="v.foot">Numaranız hazır olunca burada ve <b>telefonunuzda</b> görünür</span>
   <span>·</span>
   <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
   <span>osman.algo</span>
@@ -114,13 +125,13 @@ img,svg{-webkit-user-drag:none;user-select:none}
 <div id="call">
   <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
   <div class="no" id="cNo">–</div>
-  <p>Siparişiniz hazır, tezgâha gelin</p>
+  <p data-i18n="v.callP">Siparişiniz hazır, tezgâha gelin</p>
 </div>
 
 <div id="start">
   <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
-  <button id="go">Ekranı başlat</button>
-  <p>Sesli anons için bir kez dokunun. Ekran açık kalır, tam ekrana geçer.</p>
+  <button id="go" data-i18n="v.start">Ekranı başlat</button>
+  <p data-i18n="v.startHint">Sesli anons için bir kez dokunun. Ekran açık kalır, tam ekrana geçer.</p>
 </div>
 
 <script>
@@ -136,7 +147,7 @@ function demo(){
     D.t = Date.now(); D.hr.push(D.hz.shift()); if (D.hr.length > 6) D.hr.shift();
     D.hz.push(Math.max(...D.hz, ...D.hr) + 1);
   }
-  return { ok: true, ad: 'Kafem', hz: [...D.hz], hr: [...D.hr] };
+  return { ok: true, ad: t('c.demoName'), hz: [...D.hz], hr: [...D.hr] };
 }
 async function fetchPano(){
   if (DEMO) return demo();
@@ -166,12 +177,15 @@ function nextCall(){
   setTimeout(() => { c.classList.remove('on'); calling = false; setTimeout(nextCall, 400); }, 5000);
 }
 
+let lastO = null;
+window.onLang = () => { if (lastO){ const k = known; render(lastO); known = k; } };
 function render(o){
+  lastO = o;
   $('ad').textContent = o.ad || '';
   const fresh = known ? o.hr.filter(n => !known.has(n)) : [];
-  $('g1').innerHTML = o.hz.length ? o.hz.map(n => '<div class="n">' + n + '</div>').join('') : '<div class="empty">Şu an hazırlanan sipariş yok</div>';
+  $('g1').innerHTML = o.hz.length ? o.hz.map(n => '<div class="n">' + n + '</div>').join('') : '<div class="empty">' + t('v.emptyPrep') + '</div>';
   const hr = [...o.hr].reverse(); // en son hazır olan başta
-  $('g2').innerHTML = hr.length ? hr.map(n => '<div class="n' + (fresh.includes(n) ? ' new' : '') + '">' + n + '</div>').join('') : '<div class="empty">Hazır sipariş bekleniyor</div>';
+  $('g2').innerHTML = hr.length ? hr.map(n => '<div class="n' + (fresh.includes(n) ? ' new' : '') + '">' + n + '</div>').join('') : '<div class="empty">' + t('v.emptyReady') + '</div>';
   known = new Set(o.hr);
   if (fresh.length){ queue.push(...fresh); nextCall(); }
 }
@@ -195,10 +209,10 @@ $('start').onclick = () => {
   $('start').classList.add('off');
 };
 
-setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' }); }, 1000);
+setInterval(() => { $('clock').textContent = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }); }, 1000);
 
 if (!DEMO && !S){
-  $('start').innerHTML = '<span class="hop">h<i class="o"></i>p<span class="x">!</span></span><p>Bu ekran kafe ekranındaki Ayarlar bölümünden alınan bağlantıyla açılmalı.</p>';
+  $('start').innerHTML = '<span class="hop">h<i class="o"></i>p<span class="x">!</span></span><p>' + t('v.badLink') + '</p>';
 } else poll();
 </script>
 <script>
