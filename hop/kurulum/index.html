@@ -1,6 +1,213 @@
 <!doctype html>
-<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>hop! · Kurulum</title>
-<style>body{margin:0;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:#0a0c10;color:#f2f4f7;font-family:system-ui,sans-serif;text-align:center;padding:24px}
-b{font-size:56px;letter-spacing:-.03em}i{color:#ffb020;font-style:normal}p{color:#8a93a3;max-width:340px;line-height:1.5}</style></head>
-<body><b>hop<i>!</i></b><p>Ücretsiz sipariş çağrı sistemi. Kurulum rehberi çok yakında burada.</p><p>osman.algo</p></body></html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a0c10">
+<title data-i18n="g.title">hop! · Ücretsiz sipariş çağrı sistemi · Kurulum</title>
+<meta name="description" content="hop! — ücretsiz sipariş çağrı sistemi. Müşteri QR'ı okutur, siparişi hazır olunca telefonu çalar. 5 dakikada kurulum.">
+<link rel="icon" href="../icon-192.png">
+<script src="../i18n.js"></script>
+<script>
+I18N.add({
+  'g.title': { tr: 'hop! · Ücretsiz sipariş çağrı sistemi · Kurulum', ar: 'hop! · نظام نداء الطلبات المجاني · طريقة التركيب', en: 'hop! · Free order pager · Setup guide' },
+  'g.kick': { tr: 'Ücretsiz · 5 dakikada kurulum', ar: 'مجاني · التركيب خلال 5 دقائق', en: 'Free · 5-minute setup' },
+  'g.h1': { tr: 'Çağrı cihazı yok.<br><em>Müşterinin kendi telefonu</em> çalar.', ar: 'بدون أجهزة نداء.<br><em>هاتف الزبون نفسه</em> يرنّ.', en: 'No pager hardware.<br><em>The customer’s own phone</em> rings.' },
+  'g.lead': { tr: 'Müşteri karekodu okutur, siparişi hazır olunca telefonu çalar. Uygulama indirmek yok, aylık ücret yok — kendi Google hesabınızda çalışır.', ar: 'الزبون يمسح رمز QR، وعندما يجهز طلبه يرنّ هاتفه. بدون تنزيل تطبيق وبدون اشتراك شهري — يعمل على حساب Google الخاص بك.', en: 'The customer scans a QR code and their phone rings when the order is ready. No app to download, no monthly fee — it runs on your own Google account.' },
+  'g.demo': { tr: 'Demoyu dene', ar: 'جرّب العرض', en: 'Try the demo' },
+  'g.go': { tr: 'Kuruluma başla', ar: 'ابدأ التركيب', en: 'Start setup' },
+  'g.howH': { tr: 'Nasıl çalışır?', ar: 'كيف يعمل؟', en: 'How it works' },
+  'g.how1T': { tr: 'Kasa “Yeni sipariş”e basar', ar: 'الكاشير يضغط “طلب جديد”', en: 'Cashier taps “New order”' },
+  'g.how1': { tr: 'Hazırlama süresini ve notu seçer, ekranda karekod çıkar.', ar: 'يختار وقت التحضير والملاحظة، فيظهر رمز QR على الشاشة.', en: 'Picks the prep time and a note — a QR code appears on screen.' },
+  'g.how2T': { tr: 'Müşteri okutur', ar: 'الزبون يمسح الرمز', en: 'Customer scans' },
+  'g.how2': { tr: 'Uygulama indirmeden sırasını ve kalan süreyi canlı görür.', ar: 'يرى دوره والوقت المتبقي مباشرةً، بدون تنزيل أي تطبيق.', en: 'Sees their place in line and time left, live — no app needed.' },
+  'g.how3T': { tr: 'Hazır olunca çalar', ar: 'يرنّ عندما يجهز', en: 'It rings when ready' },
+  'g.how3': { tr: 'Kasa “Hazır”a basar, müşterinin telefonu sesle ve ekranla çağırır.', ar: 'الكاشير يضغط “جاهز”، فينادي هاتف الزبون بالصوت والشاشة.', en: 'Cashier taps “Ready” and the customer’s phone calls them with sound and screen.' },
+  'g.needH': { tr: 'Gerekenler', ar: 'ما تحتاجه', en: 'What you need' },
+  'g.need1': { tr: 'Ücretsiz bir Google hesabı', ar: 'حساب Google مجاني', en: 'A free Google account' },
+  'g.need2': { tr: 'Kasa için tablet, telefon ya da bilgisayar', ar: 'تابلت أو هاتف أو كمبيوتر للكاشير', en: 'A tablet, phone or computer for the counter' },
+  'g.need3': { tr: 'İsteğe bağlı: bekleme alanı için TV', ar: 'اختياري: تلفزيون لمكان الانتظار', en: 'Optional: a TV for the waiting area' },
+  'g.stepsH': { tr: 'Kurulum adımları', ar: 'خطوات التركيب', en: 'Setup steps' },
+  'g.shotNote': { tr: '', ar: 'الصور من واجهة Google بالتركية، وأسماء القوائم بالعربية مكتوبة في كل خطوة.', en: 'Screenshots show Google’s Turkish interface — the English menu names are written in each step.' },
+  's1T': { tr: 'Şablon tabloyu kopyalayın', ar: 'انسخ جدول القالب', en: 'Copy the template sheet' },
+  's1': { tr: 'Düğmeye basın ve <b>Kopya oluştur</b>’a dokunun. Tablo ve kod sizin Google hesabınıza kopyalanır.', ar: 'اضغط الزر ثم <b>إنشاء نسخة</b>. ينتقل الجدول والكود إلى حساب Google الخاص بك.', en: 'Tap the button, then <b>Make a copy</b>. The sheet and its code are copied to your Google account.' },
+  's1B': { tr: 'Şablonu kopyala', ar: 'انسخ القالب', en: 'Copy the template' },
+  's2T': { tr: 'Apps Script’i açın', ar: 'افتح Apps Script', en: 'Open Apps Script' },
+  's2': { tr: 'Kopyada üst menüden <b>Uzantılar → Apps Script</b>. İsterseniz önce <b>Ayarlar</b> sayfasına işletmenizin adını yazın.', ar: 'من القائمة العلوية في النسخة: <b>الإضافات ← Apps Script</b>. ويمكنك قبلها كتابة اسم محلّك في صفحة <b>Ayarlar</b>.', en: 'In your copy, open <b>Extensions → Apps Script</b>. You can first type your business name in the <b>Ayarlar</b> (Settings) tab.' },
+  's3T': { tr: 'Yeni dağıtım', ar: 'عملية نشر جديدة', en: 'New deployment' },
+  's3': { tr: 'Sağ üstte <b>Dağıt → Yeni dağıtım</b>.', ar: 'أعلى اليمين: <b>نشر ← عملية نشر جديدة</b>.', en: 'Top right: <b>Deploy → New deployment</b>.' },
+  's4T': { tr: 'Web uygulaması olarak yayınlayın', ar: 'انشره كتطبيق ويب', en: 'Publish as a web app' },
+  's4': { tr: 'Tür: <b>Web uygulaması</b> · Yürüten: <b>Ben</b> · Erişim: <b>Herkes</b> → <b>Dağıt</b>.', ar: 'النوع: <b>تطبيق ويب</b> · التنفيذ باسم: <b>أنا</b> · من يمكنه الوصول: <b>أي شخص</b> ← <b>نشر</b>.', en: 'Type: <b>Web app</b> · Execute as: <b>Me</b> · Who has access: <b>Anyone</b> → <b>Deploy</b>.' },
+  's5T': { tr: 'İzin verin', ar: 'امنح الإذن', en: 'Allow access' },
+  's5': { tr: 'Google izin ister: hesabınızı seçin. “Google bu uygulamayı doğrulamadı” uyarısı çıkarsa <b>Gelişmiş → hop! (güvenli değil) sayfasına git → İzin ver</b>. Kod sizin hesabınızda çalışır, siparişler sadece sizin tablonuzda tutulur.', ar: 'سيطلب Google الإذن: اختر حسابك. إذا ظهر تحذير “لم يتحقق Google من هذا التطبيق” اضغط <b>متقدم ← الانتقال إلى hop! (غير آمن) ← سماح</b>. الكود يعمل على حسابك، والطلبات تُحفظ في جدولك أنت فقط.', en: 'Google asks for permission — choose your account. If you see “Google hasn’t verified this app”, tap <b>Advanced → Go to hop! (unsafe) → Allow</b>. The code runs on your account and orders are stored only in your own sheet.' },
+  's6T': { tr: 'Bağlantıyı kopyalayın', ar: 'انسخ الرابط', en: 'Copy the link' },
+  's6': { tr: '<b>Web uygulaması URL</b>’sinin altındaki <b>Kopyala</b>’ya basın. Bağlantının sonu <b>/exec</b> ile biter.', ar: 'اضغط <b>نسخ</b> تحت <b>رابط تطبيق الويب</b>. ينتهي الرابط بـ <b dir="ltr">/exec</b>.', en: 'Tap <b>Copy</b> under the <b>Web app URL</b>. The link ends with <b>/exec</b>.' },
+  's7T': { tr: 'Kasa ekranını açın ve bağlayın', ar: 'افتح شاشة الكاشير واربطها', en: 'Open and connect the cashier screen' },
+  's7': { tr: 'Bağlantıyı yapıştırıp <b>Bağlan</b>’a basın. Cihaz bunu hatırlar.', ar: 'الصق الرابط واضغط <b>اتصال</b>. سيتذكّره الجهاز.', en: 'Paste the link and tap <b>Connect</b>. The device remembers it.' },
+  's7B': { tr: 'Kasa ekranını aç', ar: 'افتح شاشة الكاشير', en: 'Open the cashier screen' },
+  's8T': { tr: 'PIN belirleyin', ar: 'اختر رمز PIN', en: 'Set a PIN' },
+  's8': { tr: '4–12 haneli bir PIN seçin. Kasa ekranı bununla korunur.', ar: 'اختر رمزاً من 4 إلى 12 رقماً لحماية شاشة الكاشير.', en: 'Choose a 4–12 digit PIN to protect the cashier screen.' },
+  's9T': { tr: 'Tablete aktarın, uygulama olarak kurun', ar: 'انقلها إلى التابلت وثبّتها كتطبيق', en: 'Move it to a tablet and install it' },
+  's9': { tr: 'Kurulum bitince bir karekod çıkar: kasadaki tabletin kamerasıyla okutun, sadece PIN girin. Sonra <b>Yükle</b>’ye basın (Android) ya da Safari’de <b>Paylaş → Ana Ekrana Ekle</b> (iPhone/iPad).', ar: 'بعد الإعداد يظهر رمز QR: امسحه بكاميرا تابلت الكاشير وأدخل رمز PIN فقط. ثم اضغط <b>تثبيت</b> (أندرويد)، أو في Safari <b>مشاركة ← إضافة إلى الشاشة الرئيسية</b> (آيفون/آيباد).', en: 'When setup is done a QR code appears: scan it with the counter tablet and just enter the PIN. Then tap <b>Install</b> (Android), or in Safari <b>Share → Add to Home Screen</b> (iPhone/iPad).' },
+  's10T': { tr: 'TV ekranı (isteğe bağlı)', ar: 'شاشة التلفزيون (اختياري)', en: 'TV screen (optional)' },
+  's10': { tr: 'Kasa ekranında <b>⚙ Ayarlar → TV bağlantısı</b>’nı kopyalayıp TV’nin tarayıcısında açın. Hazır numaralar büyük ekranda sesli çağrılır.', ar: 'في شاشة الكاشير: <b>⚙ الإعدادات ← رابط شاشة التلفزيون</b>، انسخه وافتحه في متصفح التلفزيون. تظهر الأرقام الجاهزة كبيرة مع تنبيه صوتي.', en: 'On the cashier screen, copy <b>⚙ Settings → TV link</b> and open it in the TV’s browser. Ready numbers are called out big, with sound.' },
+  'g.knowH': { tr: 'Bilmeniz gerekenler', ar: 'من المهم أن تعرف', en: 'Good to know' },
+  'g.k1': { tr: 'Müşterinin sayfası açık kalmalı. Sayfayı kapatırsa çağrı ulaşmaz.', ar: 'يجب أن تبقى صفحة الزبون مفتوحة. إذا أغلقها لن يصله النداء.', en: 'The customer’s page must stay open. If they close it, the call can’t reach them.' },
+  'g.k2': { tr: 'Android: sayfadan çıksa bile bildirim gelir (bildirim izni verilmişse). Titreşim de çalışır.', ar: 'أندرويد: يصله إشعار حتى لو خرج من الصفحة (إذا سمح بالإشعارات)، والاهتزاز يعمل.', en: 'Android: a notification arrives even if they leave the page (if notifications are allowed). Vibration works too.' },
+  'g.k3': { tr: 'iPhone: sayfa ekrandayken ses ve uyarı çalışır; titreşim ve arka planda çalma yoktur.', ar: 'آيفون: الصوت والتنبيه يعملان والصفحة ظاهرة؛ لا اهتزاز ولا رنين في الخلفية.', en: 'iPhone: sound and alert work while the page is on screen; no vibration or background ringing.' },
+  'g.k4': { tr: 'Telefon sessizdeyse ses duyulmaz.', ar: 'إذا كان الهاتف على الصامت فلن يُسمع الصوت.', en: 'If the phone is on silent, the sound won’t play.' },
+  'g.k5': { tr: 'Tablodaki <b>hop!</b> menüsünden eski kayıtları silebilir, PIN’i sıfırlayabilirsiniz.', ar: 'من قائمة <b>hop!</b> في الجدول يمكنك حذف السجلات القديمة وإعادة تعيين رمز PIN.', en: 'From the <b>hop!</b> menu in your sheet you can delete old records and reset the PIN.' },
+  'g.k6': { tr: 'Ekranlar Türkçe, Arapça ve İngilizce; telefonun diline göre kendiliğinden seçilir.', ar: 'الشاشات بالعربية والتركية والإنجليزية، وتُختار تلقائياً حسب لغة الهاتف.', en: 'Screens come in English, Turkish and Arabic, picked automatically from the phone’s language.' },
+  'g.footT': { tr: 'hop!, osman.algo tarafından ücretsiz yapıldı.', ar: 'hop! صنعه osman.algo مجاناً.', en: 'hop! is made free by osman.algo.' },
+  'g.foot': { tr: 'İşletmenize özel uygulama, menü ya da sipariş sistemi mi istiyorsunuz?', ar: 'تريد تطبيقاً أو منيو أو نظام طلبات خاصاً بمحلّك؟', en: 'Want a custom app, menu or ordering system for your business?' },
+  'g.footB': { tr: 'Instagram’dan yazın', ar: 'راسلنا على إنستغرام', en: 'Message us on Instagram' }
+});
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0c10;--card:#12151b;--card2:#171b22;--line:#1f242d;--tx:#f2f4f7;--mut:#8a93a3;--amb:#ffb020;--amb2:#ff7a1a;--grn:#1ee38a;--hd:'Space Grotesk',system-ui,sans-serif}
+[lang=ar]{--hd:'Space Grotesk','IBM Plex Sans Arabic',system-ui,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--tx);font:16px/1.6 Inter,system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+[lang=ar] body{font-family:'IBM Plex Sans Arabic',Inter,system-ui,sans-serif}
+[dir=rtl] *{letter-spacing:0!important}
+a{color:inherit}
+.w{max-width:980px;margin:0 auto;padding:0 20px}
+.hop{font:700 1em/1 var(--hd);display:inline-flex;align-items:baseline;letter-spacing:-.03em;direction:ltr}
+.hop .o{display:inline-block;width:.5em;height:.5em;border:.13em solid currentColor;border-radius:50%;margin:0 .03em;transform-origin:50% 100%;animation:hopb 1.5s cubic-bezier(.35,0,.25,1) infinite}
+.hop .x{color:var(--amb);display:inline-block;transform-origin:50% 100%;animation:hopx 1.5s ease-in-out infinite}
+@keyframes hopb{0%,100%{transform:translateY(0) scale(1.18,.78)}12%{transform:translateY(0) scale(1)}45%{transform:translateY(-.42em) scale(.95,1.05)}78%{transform:translateY(0) scale(1)}}
+@keyframes hopx{0%,40%,100%{transform:rotate(0)}55%{transform:rotate(12deg)}70%{transform:rotate(-6deg)}}
+.lng{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:3px;gap:2px}
+.lng button{border:0;background:none;cursor:pointer;color:var(--mut);font:600 12.5px Inter,'IBM Plex Sans Arabic',sans-serif;padding:7px 10px;border-radius:99px;min-width:34px}
+.lng button.on{background:var(--tx);color:#111}
+nav{position:sticky;top:0;z-index:5;background:rgba(10,12,16,.82);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+nav .w{display:flex;align-items:center;justify-content:space-between;height:64px}
+nav .hop{font-size:26px}
+.hero{position:relative;overflow:hidden;padding:70px 0 60px}
+.hero:before{content:"";position:absolute;inset:-30% -10% auto;height:520px;background:radial-gradient(40% 50% at 70% 40%,rgba(255,176,32,.18),transparent 70%),radial-gradient(30% 40% at 20% 60%,rgba(255,122,26,.10),transparent 70%);filter:blur(20px);pointer-events:none}
+.hero .w{position:relative;display:grid;grid-template-columns:1.15fr .85fr;gap:40px;align-items:center}
+.kick{display:inline-block;font-size:13px;font-weight:600;color:var(--amb);background:rgba(255,176,32,.1);border:1px solid rgba(255,176,32,.25);padding:6px 12px;border-radius:99px}
+h1{font:700 clamp(34px,5.4vw,56px)/1.08 var(--hd);margin:18px 0;letter-spacing:-.02em}
+h1 em{font-style:normal;background:linear-gradient(135deg,var(--amb),var(--amb2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--mut);font-size:17.5px;max-width:520px}
+.cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
+.btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;font-weight:600;border-radius:14px;padding:15px 22px;font-size:15.5px;transition:transform .15s}
+.btn:active{transform:scale(.97)}
+.pri{background:linear-gradient(135deg,var(--amb),var(--amb2));color:#111;box-shadow:0 10px 30px -12px rgba(255,140,26,.7)}
+.gh{background:var(--card2);border:1px solid var(--line)}
+.phones{display:flex;gap:14px;justify-content:center}
+.phones img{width:46%;max-width:210px;aspect-ratio:780/1500;object-fit:cover;object-position:top;border-radius:26px;border:6px solid #1a1e26;box-shadow:0 30px 60px -30px rgba(0,0,0,.9)}
+.phones img+img{margin-top:40px}
+section{padding:56px 0;border-top:1px solid var(--line)}
+h2{font:700 30px var(--hd);margin-bottom:24px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.how div{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px}
+.how i{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:rgba(255,176,32,.12);color:var(--amb);font:700 18px var(--hd);font-style:normal;margin-bottom:14px}
+.how b{display:block;font-size:17px;margin-bottom:6px}
+.how p{color:var(--mut);font-size:14.5px}
+.shot{width:100%;border-radius:16px;border:1px solid var(--line);display:block}
+.need{display:flex;gap:12px;flex-wrap:wrap;list-style:none}
+.need li{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 16px;font-size:15px}
+.need li:before{content:"✓";color:var(--grn);font-weight:700;margin-inline-end:8px}
+.note{color:var(--mut);font-size:13.5px;margin:-12px 0 22px}
+.note:empty{display:none}
+.steps{display:flex;flex-direction:column;gap:18px;counter-reset:s}
+.step{display:grid;grid-template-columns:1fr 1.1fr;gap:26px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+.step.t{grid-template-columns:1fr}
+.step h3{font:700 20px var(--hd);display:flex;gap:12px;align-items:center;margin-bottom:8px}
+.step h3:before{counter-increment:s;content:counter(s);flex:none;display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--amb),var(--amb2));color:#111;font-size:16px}
+.step p{color:var(--mut);font-size:15px}
+.step p b{color:var(--tx);font-weight:600}
+.step .btn{margin-top:14px;padding:12px 18px;font-size:14.5px}
+.step .im{display:flex;flex-direction:column;gap:10px}
+.know{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.know li{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px 18px;font-size:14.5px;color:var(--mut)}
+.know li b{color:var(--tx)}
+footer{border-top:1px solid var(--line);padding:46px 0 60px;text-align:center}
+footer .hop{font-size:40px}
+footer p{color:var(--mut);margin:10px 0 18px}
+footer strong{display:block;color:var(--tx);margin-top:8px}
+@media (max-width:780px){
+  .hero{padding:40px 0}
+  .hero .w,.step,.how,.know{grid-template-columns:1fr}
+  .phones img{max-width:170px}
+}
+</style>
+</head>
+<body>
+<nav><div class="w"><span class="hop">h<i class="o"></i>p<span class="x">!</span></span><div class="lng" data-lng></div></div></nav>
+
+<header class="hero"><div class="w">
+  <div>
+    <span class="kick" data-i18n="g.kick">Ücretsiz · 5 dakikada kurulum</span>
+    <h1 data-i18n-html="g.h1">Çağrı cihazı yok.<br><em>Müşterinin kendi telefonu</em> çalar.</h1>
+    <p class="lead" data-i18n="g.lead"></p>
+    <div class="cta">
+      <a class="btn pri" href="#adimlar" data-i18n="g.go">Kuruluma başla</a>
+      <a class="btn gh" id="demo" href="../kafe.html?demo=1" data-i18n="g.demo">Demoyu dene</a>
+    </div>
+  </div>
+  <div class="phones"><img src="img/h2.jpg" alt=""><img src="img/h3.jpg" alt=""></div>
+</div></header>
+
+<section><div class="w">
+  <h2 data-i18n="g.howH">Nasıl çalışır?</h2>
+  <div class="how">
+    <div><i>1</i><b data-i18n="g.how1T"></b><p data-i18n="g.how1"></p></div>
+    <div><i>2</i><b data-i18n="g.how2T"></b><p data-i18n="g.how2"></p></div>
+    <div><i>3</i><b data-i18n="g.how3T"></b><p data-i18n="g.how3"></p></div>
+  </div>
+  <img class="shot" src="img/h1.jpg" alt="" style="margin-top:18px">
+</div></section>
+
+<section><div class="w">
+  <h2 data-i18n="g.needH">Gerekenler</h2>
+  <ul class="need"><li data-i18n="g.need1"></li><li data-i18n="g.need2"></li><li data-i18n="g.need3"></li></ul>
+</div></section>
+
+<section id="adimlar"><div class="w">
+  <h2 data-i18n="g.stepsH">Kurulum adımları</h2>
+  <p class="note" data-i18n="g.shotNote"></p>
+  <div class="steps">
+    <div class="step"><div><h3 data-i18n="s1T"></h3><p data-i18n-html="s1"></p>
+      <a class="btn pri" href="https://docs.google.com/spreadsheets/d/15X86awt8KUwBxS568olho63H68_azjt6G27I-jBb0fU/copy" data-i18n="s1B">Şablonu kopyala</a></div>
+      <img class="shot" src="img/s1.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s2T"></h3><p data-i18n-html="s2"></p></div><img class="shot" src="img/s2.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s3T"></h3><p data-i18n-html="s3"></p></div><img class="shot" src="img/s3.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s4T"></h3><p data-i18n-html="s4"></p></div><img class="shot" src="img/s4.jpg" alt="" loading="lazy"></div>
+    <div class="step t"><div><h3 data-i18n="s5T"></h3><p data-i18n-html="s5"></p></div></div>
+    <div class="step"><div><h3 data-i18n="s6T"></h3><p data-i18n-html="s6"></p></div><img class="shot" src="img/s5.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s7T"></h3><p data-i18n-html="s7"></p>
+      <a class="btn pri" id="kasa" href="../kafe.html" data-i18n="s7B">Kasa ekranını aç</a></div>
+      <img class="shot" src="img/s6.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s8T"></h3><p data-i18n-html="s8"></p></div><img class="shot" src="img/s7.jpg" alt="" loading="lazy"></div>
+    <div class="step"><div><h3 data-i18n="s9T"></h3><p data-i18n-html="s9"></p></div>
+      <div class="im"><img class="shot" src="img/s9.jpg" alt="" loading="lazy"><img class="shot" src="img/s8.jpg" alt="" loading="lazy"></div></div>
+    <div class="step"><div><h3 data-i18n="s10T"></h3><p data-i18n-html="s10"></p></div><img class="shot" src="img/s10.jpg" alt="" loading="lazy"></div>
+  </div>
+</div></section>
+
+<section><div class="w">
+  <h2 data-i18n="g.knowH">Bilmeniz gerekenler</h2>
+  <ul class="know">
+    <li data-i18n-html="g.k1"></li><li data-i18n-html="g.k2"></li><li data-i18n-html="g.k3"></li>
+    <li data-i18n-html="g.k4"></li><li data-i18n-html="g.k5"></li><li data-i18n-html="g.k6"></li>
+  </ul>
+</div></section>
+
+<footer><div class="w">
+  <span class="hop">h<i class="o"></i>p<span class="x">!</span></span>
+  <p><span data-i18n="g.footT"></span><strong data-i18n="g.foot"></strong></p>
+  <a class="btn pri" href="https://www.instagram.com/osman.algo/" data-i18n="g.footB">Instagram’dan yazın</a>
+</div></footer>
+
+<script>
+// Demo ve kasa bağlantıları seçili dili taşısın
+function links(){ const l = '&lang=' + I18N.lang; document.getElementById('demo').href = '../kafe.html?demo=1' + l; document.getElementById('kasa').href = '../kafe.html?lang=' + I18N.lang; }
+window.onLang = links; links();
+</script>
+</body>
+</html>

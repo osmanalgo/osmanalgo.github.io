@@ -144,7 +144,7 @@
 
   function t(k, v) {
     const e = S[k];
-    let s = e ? (e[LANG] || e.en || e.tr) : k;
+    let s = e ? (LANG in e ? e[LANG] : (e.en || e.tr)) : k;
     if (v) for (const x in v) s = s.split('{' + x + '}').join(v[x]);
     return s;
   }
@@ -177,7 +177,8 @@
     apply();
   }
 
-  window.I18N = { t, set, apply, get lang() { return LANG; } };
+  function add(d) { Object.assign(S, d); }
+  window.I18N = { t, set, apply, add, get lang() { return LANG; } };
   window.t = t;
   // ilk boyama öncesi yön/dil
   document.documentElement.lang = LANG;
